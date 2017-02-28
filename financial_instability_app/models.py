@@ -1,5 +1,6 @@
 from . import db
 
+
 class Ticker (db.Model):
     __tablename__ = 'tickers'
     id = db.Column(db.Integer, primary_key=True)
