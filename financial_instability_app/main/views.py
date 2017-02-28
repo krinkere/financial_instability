@@ -24,3 +24,7 @@ def index():
         return redirect(url_for('main.index'))
     return render_template("index.html", form=form, ticker=session.get("ticker_symbol"),
                            current_time=datetime.utcnow(), known=session.get('known', False))
+
+@main.route('/corr', methods=['GET', 'POST'])
+def corr():
+    return render_template("corr.html", ticker=session.get("ticker_symbol"))

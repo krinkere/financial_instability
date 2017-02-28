@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Financial Instability{% endblock %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>Correlation</h1>
+
+        <br>
+        <p>
+          TBD
+          Display correlation for Stock Symbol: <b>{% if ticker %}{{ ticker|upper }}{% else %}N/A{% endif %}</b>
+        </p>
+    </div>
+{% endblock %}
