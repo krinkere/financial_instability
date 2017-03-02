@@ -75,3 +75,8 @@ def adj_close_plot():
 
     return render_template("adj_close_plot.html", ticker=session.get("ticker_symbol"),
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+
+
+@main.route('/available_stocks', methods=['GET', 'POST'])
+def available_stocks():
+    return render_template("available_stocks.html")
