@@ -9,11 +9,24 @@ from ..models import Ticker, Sector, Portfolio
 # Define routes
 @main.route('/', methods=['GET', 'POST'])
 def index():
+    from urllib import urlopen
+    from lxml.html import parse
+
+    def get_sector(ticker):
+        tree = parse(urlopen('http://www.google.com/finance?&q=NASDAQ%3A' + ticker))
+        return tree.xpath("//a[@id='sector']")[0].text, tree.xpath("//a[@id='sector']")[0].getnext().text
+
     form = TickerForm()
     if form.validate_on_submit():
         ticker_symbol = Ticker.query.filter_by(ticker_symbol=form.ticker_symbol.data).first()
         if ticker_symbol is None:
-            ticker = Ticker(ticker_symbol=form.ticker_symbol.data)
+            sector_name, industry_name = get_sector(form.ticker_symbol.data)
+            sector = Sector.query.filter_by(sector=sector_name, industry=industry_name).first()
+            if sector is None:
+                sector = Sector(sector=sector_name, industry=industry_name)
+                db.session.add(sector)
+            ticker = Ticker(ticker_symbol=form.ticker_symbol.data, sector=sector)
+
             db.session.add(ticker)
             db.session.commit()
             session['known'] = False
@@ -35,7 +48,7 @@ def corr():
 def candle_plot():
     from pandas_datareader import data
     import datetime
-    from bokeh.plotting import figure, show, output_file
+    from bokeh.plotting import figure
     from bokeh.embed import components
     from bokeh.resources import CDN
 
@@ -59,7 +72,7 @@ def candle_plot():
     df['Height'] = abs(df.Close-df.Open)
 
     p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
-    p.grid.grid_line_alpha=0.3
+    p.grid.grid_line_alpha = 0.3
 
     hours_12 = 12*60*60*1000
     p.rect(df.index[df.Status == 'Increase'], df.Middle[df.Status == 'Increase'], hours_12,
@@ -68,10 +81,34 @@ def candle_plot():
            df.Height[df.Status == 'Decrease'], fill_color='red', line_color='black')
     p.segment(df.index, df.High, df.index, df.Low, color='Black')
 
-
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]
     cdn_css = CDN.css_files[0]
 
     return render_template("candle_stick.html", ticker=session.get("ticker_symbol"), generated_script=generated_script,
                            div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+
+
+@main.route('/adj_close_plot', methods=['GET', 'POST'])
+def adj_close_plot():
+    from pandas_datareader import data
+    import datetime
+    from bokeh.plotting import figure
+    from bokeh.embed import components
+    from bokeh.resources import CDN
+
+    start = datetime.datetime(2015, 1, 1)
+    end = datetime.datetime(2017, 3, 2)
+
+    ticker = session.get("ticker_symbol")
+    df = data.DataReader(name=ticker, data_source="yahoo", start=start, end=end)
+    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
+    p.grid.grid_line_alpha = 0.3
+    p.line(df.index, df['Adj Close'], line_width=2)
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return render_template("adj_close_plot.html", ticker=session.get("ticker_symbol"),
+                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)

@@ -15,13 +15,14 @@ class Ticker (db.Model):
 class Sector (db.Model):
     __tablename__ = 'stock_sector'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), unique=True, index=True)
+    sector = db.Column(db.String(64), index=True)
+    industry = db.Column(db.String(64), index=True)
 
     # has to define lazy as dynamic, otherwise all() will be executed by default
     tickers = db.relationship('Ticker', backref='sector', lazy='dynamic')
 
     def __repr__(self):
-        return '<Stock Sector: %r>' % self.name
+        return '<Stock Sector: %r Industry: %r>' % (self.sector, self.industry)
 
 
 class Portfolio(db.Model):
