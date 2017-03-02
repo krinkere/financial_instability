@@ -63,24 +63,15 @@ def candle_plot():
 
 @main.route('/adj_close_plot', methods=['GET', 'POST'])
 def adj_close_plot():
-    from pandas_datareader import data
     import datetime
-    from bokeh.plotting import figure
-    from bokeh.embed import components
-    from bokeh.resources import CDN
 
     start = datetime.datetime(2015, 1, 1)
     end = datetime.date.today()
 
     ticker = session.get("ticker_symbol")
-    df = data.DataReader(name=ticker, data_source="yahoo", start=start, end=end)
-    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
-    p.grid.grid_line_alpha = 0.3
-    p.line(df.index, df['Adj Close'], line_width=2)
+    df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
 
-    generated_script, div_tag = components(p)
-    cdn_js = CDN.js_files[0]
-    cdn_css = CDN.css_files[0]
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_single_line_plot(df, ticker)
 
     return render_template("adj_close_plot.html", ticker=session.get("ticker_symbol"),
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
