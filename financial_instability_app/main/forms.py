@@ -4,5 +4,5 @@ from wtforms.validators import DataRequired
 
 
 class TickerForm(Form):
-    ticker_symbol = StringField('Stock symbol?', validators=[DataRequired()])
+    ticker_symbol = StringField('Submit new stock symbol', validators=[DataRequired()])
     submit = SubmitField('Submit')

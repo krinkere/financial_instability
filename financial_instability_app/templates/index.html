@@ -8,15 +8,15 @@
         <h1>Welcome to Financial Instability!</h1>
 
         <p>The local date and time is {{ moment(current_time).format('LLL') }}.</p>
-        <p>That was {{ moment(current_time).fromNow(refresh=True) }}</p>
+{#        <p>That was {{ moment(current_time).fromNow(refresh=True) }}</p>#}
         <br>
         <p>
-            Stock Symbol: <b>{% if ticker %}{{ ticker|upper }}{% else %}N/A{% endif %}</b>
-            {% if known %}
-                Known
-            {% else %}
-                Unknown
-            {% endif %}
+            Current Stock Symbol: <b>{% if ticker %}{{ ticker|upper }}{% else %}N/A{% endif %}</b>
+{#            {% if known %}#}
+{#                Known#}
+{#            {% else %}#}
+{#                Unknown#}
+{#            {% endif %}#}
         </p>
     </div>
     {{ wtf.quick_form(form) }}
