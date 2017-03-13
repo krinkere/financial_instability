@@ -1,9 +1,13 @@
 from datetime import datetime
 from dateutil import parser
 import pandas_datareader.data as web
-# Uncomment following two lines for extra logging information
-# import logging
+import logging
+# Uncomment to decrease default level of logging to debug, ie. get the most data
 # logging.basicConfig(level=logging.DEBUG)
+
+logger = logging.getLogger("retrieve_stock_info")
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.FileHandler('logs/retrieve_stock_info.log'))
 
 
 def get_stock_from_yahoo(symbol, start, end):
@@ -12,6 +16,7 @@ def get_stock_from_yahoo(symbol, start, end):
     Computes daily Returns based on Adj Close.
     Returns pandas dataframe.
     """
+    logger.info("Received %s for data range from %r until %r" % (symbol, start, end))
     df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
 
     def inc_dec(c, o):

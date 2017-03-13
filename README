@@ -1,5 +1,15 @@
 Create new environment via
 # pip install -r requirements.txt
 
+Activate new environment
+# source activate financial_instability
+
+Refresh requirements file
+# pip freeze >requirements.txt
+
 Create new database
 # python manage.py create_db
+
+Delete database
+# python manage.py destroy_db
+
