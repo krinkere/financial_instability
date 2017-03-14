@@ -7,6 +7,8 @@ from ..models import Ticker, Sector, Portfolio
 from ..utils import retrieve_stock_info
 from ..utils import visualization
 from ..utils import df_utils
+from ..utils import stock_utils
+
 
 # Define routes
 @main.route('/', methods=['GET', 'POST'])
@@ -78,23 +80,56 @@ def adj_close_plot():
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
 
-@main.route('/global_comparison_plot', methods=['GET'])
-def global_comparison_plot():
+@main.route('/us_comparison_plot_adjclose', methods=['GET'])
+def us_comparison_plot_adjclose():
     import datetime
 
     start = datetime.datetime(2016, 1, 1)
     end = datetime.date.today()
 
-    tickers = ['AAPL', 'SPY', 'Nasdaq', 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia', 'S&P 500']
-    df = retrieve_stock_info.get_stock_data_from_web("AAPL", start, end)
-    df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_AAPL', 'AdjClose_SPY', 'AdjClose_^IXIC', 'AdjClose_^GDAXI',
-                                                  'AdjClose_^FCHI', 'AdjClose_^HSI',
-                                                  'AdjClose_^N225', 'AdjClose_^AXJO', 'AdjClose_SPY'])
+    ticker = session.get("ticker_symbol")
+
+    tickers = [session.get("ticker_symbol"), 'SPY']
+    df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
+    df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_'+ticker, 'AdjClose_SPY'])
     df.columns = tickers
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(df, tickers)
 
-    return render_template("global_comparison_plot.html", ticker=session.get("ticker_symbol"),
+
+    normalized_data = stock_utils.normalize_data(df)
+    daily_returns = stock_utils.calculate_daily_returns(df)
+    cum_returns = stock_utils.calculate_cumulative_returns_from_daily(df)
+
+    return render_template("us_comparison_plot_adjclose.html", ticker=session.get("ticker_symbol"),
+                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+
+
+@main.route('/global_comparison_plot_adjclose', methods=['GET'])
+def global_comparison_plot_adjclose():
+    import datetime
+
+    start = datetime.datetime(2016, 1, 1)
+    end = datetime.date.today()
+
+    ticker = session.get("ticker_symbol")
+    print "WE HAVE A %s" % ticker
+
+    tickers = [session.get("ticker_symbol"), 'SPY', 'Nasdaq', 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
+    df = retrieve_stock_info.get_global_stock_data_from_web(ticker, start, end)
+    df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_'+ticker, 'AdjClose_SPY', 'AdjClose_^IXIC', 'AdjClose_^GDAXI',
+                                                  'AdjClose_^FCHI', 'AdjClose_^HSI',
+                                                  'AdjClose_^N225', 'AdjClose_^AXJO'])
+    df.columns = tickers
+
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(df, tickers)
+
+
+    normalized_data = stock_utils.normalize_data(df)
+    daily_returns = stock_utils.calculate_daily_returns(df)
+    cum_returns = stock_utils.calculate_cumulative_returns_from_daily(df)
+
+    return render_template("global_comparison_plot_adjclose.html", ticker=session.get("ticker_symbol"),
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
 @main.route('/available_stocks', methods=['GET'])

@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}" type="text/css">
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 {% endblock %}
 
 {% block navbar %}
@@ -24,10 +25,32 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a href="/">Home</a></li>
-                    <li><a href="/adj_close_plot">Price Movements</a></li>
-                    <li><a href="/candle_plot">Detailed Movements</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Movements<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/adj_close_plot">Price Movements</a></li>
+                            <li><a href="/candle_plot">Detailed Price Movements</a></li>
+                        </ul>
+                    </li>
                     <li><a href="/corr">Correlation</a></li>
                     <li><a href="/available_stocks">Analyzed Stocks</a></li>
+                    <!-- http://www.bootply.com/nZaxpxfiXz -->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Comparisons<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/us_comparison_plot_adjclose">U.S. Adjusted Close</a></li>
+                            <li><a href="/us_comparison_plot_norm">U.S. Normalized</a></li>
+                            <li><a href="/us_comparison_plot_daily">U.S. Daily Returns</a></li>
+                            <li><a href="/us_comparison_plot_cum">U.S. Cumulative</a></li>
+                            <li class="divider"></li>
+                            <li><a href="/global_comparison_plot_adjclose">Global Adjusted Close</a></li>
+                            <li><a href="/global_comparison_plot_norm">Global Normalized</a></li>
+                            <li><a href="/global_comparison_plot_daily">Global Daily Returns</a></li>
+                            <li><a href="/global_comparison_plot_cum">Global Cumulative</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#">Dropdown Link 3</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>

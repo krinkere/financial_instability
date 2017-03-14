@@ -47,7 +47,25 @@ def append_symbol_to_columns(df, symbol_name):
     return df
 
 
-def get_stock_data_from_web(ticker, start, end):
+def get_us_stock_data_from_web(ticker, start, end):
+    """
+    Collects predictors data from Yahoo Finance and quandl.
+    Returns a list of dataframes.
+    """
+    # start = parser.parse(start_string)
+    # end = parser.parse(end_string)
+
+    # Get US market data
+    sp500 = get_stock_from_yahoo('SPY', start, end)
+
+    # Get ticker data
+    stock = get_stock_from_yahoo(ticker, start, end)
+    df = df_utils.join_dataframes(stock, sp500)
+
+    return df
+
+
+def get_global_stock_data_from_web(ticker, start, end):
     """
     Collects predictors data from Yahoo Finance and quandl.
     Returns a list of dataframes.
