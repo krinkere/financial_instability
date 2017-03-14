@@ -1,5 +1,5 @@
 from datetime import datetime
-from dateutil import parser
+import df_utils
 import pandas_datareader.data as web
 import logging
 # Uncomment to decrease default level of logging to debug, ie. get the most data
@@ -17,6 +17,7 @@ def get_stock_from_yahoo(symbol, start, end):
     Returns pandas dataframe.
     """
     logger.info("Received %s for data range from %r until %r" % (symbol, start, end))
+
     df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
 
     def inc_dec(c, o):
@@ -46,13 +47,13 @@ def append_symbol_to_columns(df, symbol_name):
     return df
 
 
-def get_stock_data_from_web(ticker, start_string, end_string):
+def get_stock_data_from_web(ticker, start, end):
     """
     Collects predictors data from Yahoo Finance and quandl.
     Returns a list of dataframes.
     """
-    start = parser.parse(start_string)
-    end = parser.parse(end_string)
+    # start = parser.parse(start_string)
+    # end = parser.parse(end_string)
 
     # Get major markets data
     nasdaq = get_stock_from_yahoo('^IXIC', start, end)
@@ -62,14 +63,20 @@ def get_stock_data_from_web(ticker, start_string, end_string):
     hong_kong = get_stock_from_yahoo('^HSI', start, end)
     japan = get_stock_from_yahoo('^N225', start, end)
     australia = get_stock_from_yahoo('^AXJO', start, end)
-
-    # tested results taken from qundl vs yahoo. it appears that quandl is day behind
-    # aapl2 = get_stock_from_quandl("YAHOO/AAPL", 'AAPL2', start_string, end_string)
+    sp500 = get_stock_from_yahoo('SPY', start, end)
 
     # Get ticker data
     stock = get_stock_from_yahoo(ticker, start, end)
+    df = df_utils.join_dataframes(stock, nasdaq)
+    df = df_utils.join_dataframes(df, frankfurt)
+    df = df_utils.join_dataframes(df, paris)
+    df = df_utils.join_dataframes(df, hong_kong)
+    df = df_utils.join_dataframes(df, japan)
+    df = df_utils.join_dataframes(df, australia)
+    df = df_utils.join_dataframes(df, sp500)
 
-    return [stock, nasdaq, frankfurt, paris, hong_kong, japan, australia]
+    # return [stock, nasdaq, frankfurt, paris, hong_kong, japan, australia, sp500]
+    return df
 
 
 def construct_yahoo_finance_url(ticker, start_date, end_date, freq):

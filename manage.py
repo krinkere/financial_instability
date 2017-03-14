@@ -13,6 +13,7 @@ migrate = Migrate(financial_instability_app, db)
 def make_shell_context():
     return dict(financial_instability_app=financial_instability_app, db=db, Ticker=Ticker, Sector=Sector,
                 Portfolio=Portfolio)
+
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
 
