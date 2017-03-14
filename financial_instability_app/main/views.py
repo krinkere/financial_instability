@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 from flask import render_template, session, redirect, url_for, flash, make_response
 from . import main
 from .forms import TickerForm
@@ -37,10 +37,12 @@ def index():
         else:
             session['known'] = True
         session["ticker_symbol"] = form.ticker_symbol.data
+        session["start_date"] = form.start.data
+        session["end_date"] = form.end.data
         flash("Data is being retrieved for %s" % form.ticker_symbol.data)
         return redirect(url_for('main.index'))
     return render_template("index.html", form=form, ticker=session.get("ticker_symbol"),
-                           current_time=datetime.utcnow(), known=session.get('known', False))
+                           current_time=datetime.datetime.utcnow(), known=session.get('known', False))
 
 
 @main.route('/corr', methods=['GET'])
@@ -48,13 +50,20 @@ def corr():
     return render_template("corr.html", ticker=session.get("ticker_symbol"))
 
 
-@main.route('/candle_plot', methods=['GET'])
-def candle_plot():
-    import datetime
-
+def get_start_end_dates():
     start = datetime.datetime(2015, 1, 1)
     end = datetime.date.today()
 
+    if session.get("start_date"):
+        start = session.get("start_date")
+    if session.get("end_date"):
+        end = session.get("end_date")
+
+    return start, end
+
+@main.route('/candle_plot', methods=['GET'])
+def candle_plot():
+    start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
     df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
 
@@ -66,11 +75,7 @@ def candle_plot():
 
 @main.route('/adj_close_plot', methods=['GET'])
 def adj_close_plot():
-    import datetime
-
-    start = datetime.datetime(2015, 1, 1)
-    end = datetime.date.today()
-
+    start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
     df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
 
@@ -123,11 +128,7 @@ def us_comparison_plot_cum():
 
 
 def us_get_comparison_data():
-    import datetime
-
-    start = datetime.datetime(2016, 1, 1)
-    end = datetime.date.today()
-
+    start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
 
     tickers = [session.get("ticker_symbol"), 'SPY']
@@ -180,11 +181,7 @@ def global_comparison_plot_cum():
 
 
 def get_global_comparison_data():
-    import datetime
-
-    start = datetime.datetime(2016, 1, 1)
-    end = datetime.date.today()
-
+    start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
     print "WE HAVE A %s" % ticker
 
@@ -206,10 +203,7 @@ def available_stocks():
 
 @main.route('/stock_analysis', methods=['GET'])
 def stock_analysis():
-    import datetime
-
-    start = datetime.datetime(2016, 1, 1)
-    end = datetime.date.today()
+    start, end = get_start_end_dates()
     aapl = retrieve_stock_info.get_stock_from_yahoo("AAPL", start, end)
     goog = retrieve_stock_info.get_stock_from_yahoo("GOOG", start, end)
     stocks = df_utils.join_dataframes(aapl, goog)

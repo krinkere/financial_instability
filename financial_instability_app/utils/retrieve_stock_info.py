@@ -20,8 +20,7 @@ def get_stock_from_yahoo(symbol, start, end):
     Computes daily Returns based on Adj Close.
     Returns pandas dataframe.
     """
-    logger.info("Received %s for data range from %s until %s" % (symbol, start.strftime('%d/%m/%Y'),
-                                                                 end.strftime('%d/%m/%Y')))
+    logger.info("Received %s for data range from %s until %s" % (symbol, start, end))
 
     df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
 

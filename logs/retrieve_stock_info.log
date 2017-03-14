@@ -4,3 +4,28 @@
 2017-03-14 17:34:03;INFO;Received AAPL for data range from 2015-01-01 00:00:00 until 2017-03-14
 2017-03-14 17:35:43;INFO;Received AAPL for data range from 01/01/2015 until 2017-03-14
 2017-03-14 17:36:47;INFO;Received AAPL for data range from 01/01/2015 until 14/03/2017
+2017-03-14 18:50:14;INFO;Received AAPL for data range from Fri, 01 Jan 2016 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 18:51:27;INFO;Received AAPL for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 18:52:58;INFO;Received SPY for data range from 2016-01-01 00:00:00 until 2017-03-14
+2017-03-14 18:52:58;INFO;Received AAPL for data range from 2016-01-01 00:00:00 until 2017-03-14
+2017-03-14 19:00:20;INFO;Received SPY for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:21;INFO;Received GOOG for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:35;INFO;Received ^IXIC for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:35;INFO;Received ^GDAXI for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:35;INFO;Received ^FCHI for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:35;INFO;Received ^HSI for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:36;INFO;Received ^N225 for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:36;INFO;Received ^AXJO for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:36;INFO;Received SPY for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:36;INFO;Received GOOG for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:48;INFO;Received SPY for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:49;INFO;Received GOOG for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:55;INFO;Received ^IXIC for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:55;INFO;Received ^GDAXI for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:55;INFO;Received ^FCHI for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:55;INFO;Received ^HSI for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:55;INFO;Received ^N225 for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:55;INFO;Received ^AXJO for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:55;INFO;Received SPY for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:00:55;INFO;Received GOOG for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
+2017-03-14 19:01:03;INFO;Received GOOG for data range from Sun, 01 Jan 2017 00:00:00 GMT until Tue, 14 Mar 2017 00:00:00 GMT
