@@ -7,7 +7,11 @@ import logging
 
 logger = logging.getLogger("retrieve_stock_info")
 logger.setLevel(logging.INFO)
-logger.addHandler(logging.FileHandler('logs/retrieve_stock_info.log'))
+fh = logging.FileHandler('logs/retrieve_stock_info.log')
+formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s",
+                              "%Y-%m-%d %H:%M:%S")
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 def get_stock_from_yahoo(symbol, start, end):
@@ -16,7 +20,8 @@ def get_stock_from_yahoo(symbol, start, end):
     Computes daily Returns based on Adj Close.
     Returns pandas dataframe.
     """
-    logger.info("Received %s for data range from %r until %r" % (symbol, start, end))
+    logger.info("Received %s for data range from %s until %s" % (symbol, start.strftime('%d/%m/%Y'),
+                                                                 end.strftime('%d/%m/%Y')))
 
     df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
 
