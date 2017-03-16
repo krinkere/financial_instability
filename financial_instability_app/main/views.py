@@ -119,7 +119,7 @@ def us_comparison_plot_daily():
 @main.route('/us_comparison_plot_cum', methods=['GET'])
 def us_comparison_plot_cum():
     df, tickers, ticker = us_get_comparison_data()
-    cum_returns = stock_utils.calculate_cumulative_returns_from_daily(df)
+    cum_returns = stock_utils.calculate_cumulative_returns(df)
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(cum_returns, tickers)
 
@@ -172,7 +172,7 @@ def global_comparison_plot_daily():
 @main.route('/global_comparison_plot_cum', methods=['GET'])
 def global_comparison_plot_cum():
     df, tickers, ticker = get_global_comparison_data()
-    cum_returns = stock_utils.calculate_cumulative_returns_from_daily(df)
+    cum_returns = stock_utils.calculate_cumulative_returns(df)
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(cum_returns, tickers)
 
