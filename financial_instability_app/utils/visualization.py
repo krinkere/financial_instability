@@ -51,6 +51,25 @@ def generate_multi_line_plot(df, tickers):
     return generated_script, div_tag, cdn_js, cdn_css
 
 
+def generate_bollinger_plot(df, ticker):
+    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
+    p.grid.grid_line_alpha = 0.3
+    # draw adj close price plot
+    p.line(df.index, df["AdjClose_"+ticker], line_width=2, legend=ticker, color='black')
+    # draw rolling mean plot
+    p.line(df.index, df["rolling_mean"], line_width=2, legend='Rolling Mean', color='blue')
+    # draw upper bollinger plot
+    p.line(df.index, df["upper_band"], line_width=2, legend='Upper Band', color='red')
+    # draw lowe bollinger plot
+    p.line(df.index, df["lower_band"], line_width=2, legend='Lower Band', color='red')
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css
+
+
 def plot_stock_analysis(adj_close_data):
     normalized_data = stock_utils.normalize_data(adj_close_data)
     daily_returns = stock_utils.calculate_daily_returns(adj_close_data)

@@ -24,3 +24,45 @@ def calculate_cumulative_returns(df):
 
 def calculate_cumulative_returns_from_daily(df):
     return df.cumsum()
+
+
+def calculate_rolling_mean(df, window=20, column_name=''):
+    """
+    Rolling mean is a way to compute the mean over window of period. If you were to plot the rolling mean stats, you
+    would be able to come up with a graph that generally follows the stock prices with certain lag.
+
+    With rolling mean you need to watch for cross overs, i.e. the time that stock crosses the rolling mean line and goes
+    down (or vise versa) it would could signify that it would come up toward the mean at some point, hence might be a good
+    time to buy. The challenge here is to guess where to buy the stock since it might still go down or up.
+    """
+    if column_name:
+        df['rolling_mean'] = df[column_name].rolling(window=window, center=False).mean()
+        return df
+    return df.rolling(window=window, center=False).mean()
+
+
+def calculate_bollinger_bands(df, window=20, column_name=''):
+    """
+    Bollinger Bands - Like it was mentioned above once stock prices cross rolling mean it might be an indication to buy or
+    sell, but when? Bollinger Bands measire rolling standard deviation and plot 2 sigma plots above and below rolling mean
+    It is expected that once stock price reaches Bollinger Bands it would most likely to change direction.
+
+    Hence to compute Bollinger Bands you need:
+    1. Compute rolling mean
+    2. Compute rolling standard deviation
+    3. Compute upper and lower bands
+    """
+    # roll_mean = calculate_rolling_mean(df, window, column_name)
+    roll_std = calculate_rolling_std(df, window, column_name)
+    df = roll_std
+    df['upper_band'] = df['rolling_mean'] + 2 * df['rolling_std']
+    df['lower_band'] = df['rolling_mean'] - 2 * df['rolling_std']
+    # lower_band = roll_mean - 2 * roll_std
+    return df
+
+
+def calculate_rolling_std(df, window, column_name=''):
+    if column_name:
+        df['rolling_std'] = df[column_name].rolling(window=window, center=False).std()
+        return df
+    return df.rolling(window=window, center=False).std()

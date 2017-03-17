@@ -61,6 +61,7 @@ def get_start_end_dates():
 
     return start, end
 
+
 @main.route('/candle_plot', methods=['GET'])
 def candle_plot():
     start, end = get_start_end_dates()
@@ -71,6 +72,22 @@ def candle_plot():
 
     return render_template("candle_stick.html", ticker=session.get("ticker_symbol"), generated_script=generated_script,
                            div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+
+
+@main.route('/bollinger_bands_plot', methods=['GET'])
+def bollinger_bands_plot():
+    df, ticker = get_stock_data()
+    df = stock_utils.calculate_rolling_mean(df, column_name="AdjClose_"+ticker)
+    df = stock_utils.calculate_bollinger_bands(df, column_name="AdjClose_"+ticker)
+
+    # df = df_utils.join_dataframes(df, roll_mean)
+    # df = df_utils.join_dataframes(df, upper_band)
+    # df = df_utils.join_dataframes(df, lower_band)
+
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_bollinger_plot(df, ticker)
+
+    return render_template("bollinger_bands_plot.html", ticker=session.get("ticker_symbol"),
+                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
 
 @main.route('/adj_close_plot', methods=['GET'])
@@ -127,6 +144,15 @@ def us_comparison_plot_cum():
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
 
+def get_stock_data():
+    start, end = get_start_end_dates()
+    ticker = session.get("ticker_symbol")
+    df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
+    df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker])
+
+    return df, ticker
+
+
 def us_get_comparison_data():
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
@@ -159,6 +185,7 @@ def global_comparison_plot_norm():
     return render_template("comparison_plot.html", ticker=ticker, comparator_type="normalized prices", economy_type="Global",
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
+
 @main.route('/global_comparison_plot_daily', methods=['GET'])
 def global_comparison_plot_daily():
     df, tickers, ticker = get_global_comparison_data()
@@ -168,6 +195,7 @@ def global_comparison_plot_daily():
 
     return render_template("comparison_plot.html", ticker=ticker, comparator_type="daily changes", economy_type="Global",
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+
 
 @main.route('/global_comparison_plot_cum', methods=['GET'])
 def global_comparison_plot_cum():
