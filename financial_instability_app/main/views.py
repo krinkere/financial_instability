@@ -129,7 +129,7 @@ def mov_av_plot(num_days):
     tickers = ["rolling_mean", column_name]
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(df, tickers=tickers,
                                                                                         labels=[str(num_days) +
-                                                                                                " rolling mean",
+                                                                                                " day rolling mean",
                                                                                                 ticker])
 
     return render_template("mov_av_plot.html", num_days=num_days, ticker=session.get("ticker_symbol"),
