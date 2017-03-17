@@ -52,10 +52,10 @@ def generate_adj_close_histo_plot(df, ticker):
     return generated_script, div_tag, cdn_js, cdn_css
 
 
-def generate_single_line_plot(df, ticker):
+def generate_single_line_plot(df, column, ticker):
     p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
     p.grid.grid_line_alpha = 0.3
-    p.line(df.index, df['AdjClose_'+ticker], line_width=2)
+    p.line(df.index, df[column], line_width=2)
 
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]
@@ -64,12 +64,12 @@ def generate_single_line_plot(df, ticker):
     return generated_script, div_tag, cdn_js, cdn_css
 
 
-def generate_multi_line_plot(df, tickers):
+def generate_multi_line_plot(df, tickers, labels):
     area_colors = get_colors(len(tickers))
     p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
     p.grid.grid_line_alpha = 0.3
-    for (color, ticker) in zip(area_colors, tickers):
-        p.line(df.index, df[ticker], line_width=2, legend=ticker, color=color)
+    for (color, ticker, label) in zip(area_colors, tickers, labels):
+        p.line(df.index, df[ticker], line_width=2, legend=label, color=color)
 
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]
