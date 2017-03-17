@@ -1,6 +1,8 @@
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.resources import CDN
+from bokeh.charts import Histogram
+from bokeh.models import Span
 import matplotlib.pyplot as plt
 import stock_utils
 from colorsys import hsv_to_rgb
@@ -17,6 +19,31 @@ def generate_candlestick_plot(df, ticker):
     p.rect(df.index[df['Status_'+ticker] == 'Decrease'], df['Middle_'+ticker][df['Status_'+ticker] == 'Decrease'],
            hours_12, df['Height_'+ticker][df['Status_'+ticker] == 'Decrease'], fill_color='red', line_color='black')
     p.segment(df.index, df['High_'+ticker], df.index, df['Low_'+ticker], color='Black')
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css
+
+
+def generate_adj_close_histo_plot(df, ticker):
+    # little hack here since Bokeh seems to get weird if numbers are too small...
+    df *= 100
+    column = "AdjClose_"+ticker
+    p = Histogram(df, values=column, bins=10)
+
+    mean = df[column].mean()
+    print mean
+    std = df[column].std()
+    print std
+
+    mean_line = Span(location=mean, dimension='height', line_color='black', line_width=3)
+    std_line_left = Span(location=-std, dimension='height', line_color='blue', line_dash="dashed", line_width=3)
+    std_line_right = Span(location=std, dimension='height', line_color='blue', line_dash="dashed", line_width=3)
+
+
+    p.renderers.extend([mean_line, std_line_left, std_line_right])
 
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]

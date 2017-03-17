@@ -90,6 +90,22 @@ def bollinger_bands_plot():
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
 
+@main.route('/trade_volume_plot')
+def trade_volume_plot():
+    pass
+
+
+@main.route('/adj_close_histo_plot')
+def adj_close_histo_plot():
+    df, ticker = get_stock_data()
+    daily_returns = stock_utils.calculate_daily_returns(df)
+
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_adj_close_histo_plot(daily_returns, ticker)
+
+    return render_template("adj_close_histo_plot.html", ticker=session.get("ticker_symbol"),
+                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+
+
 @main.route('/adj_close_plot', methods=['GET'])
 def adj_close_plot():
     start, end = get_start_end_dates()
