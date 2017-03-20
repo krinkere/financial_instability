@@ -47,7 +47,15 @@ def index():
 
 @main.route('/corr', methods=['GET'])
 def corr():
-    return render_template("corr.html", ticker=session.get("ticker_symbol"))
+    df, tickers, ticker = us_get_comparison_data()
+    daily_returns = stock_utils.calculate_daily_returns(df)
+
+    generated_script, div_tag, cdn_js, cdn_css, pearson_corr, comp_ticket \
+        = visualization.generate_corr_plot(daily_returns, tickers)
+
+    return render_template("corr.html", ticker=session.get("ticker_symbol"), generated_script=generated_script,
+                           div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css, pearson_corr=pearson_corr,
+                           comp_ticket=comp_ticket)
 
 
 def get_start_end_dates():
@@ -100,10 +108,12 @@ def adj_close_histo_plot():
     df, ticker = get_stock_data()
     daily_returns = stock_utils.calculate_daily_returns(df)
 
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_adj_close_histo_plot(daily_returns, ticker)
+    generated_script, div_tag, cdn_js, cdn_css, mean, std = \
+        visualization.generate_adj_close_histo_plot(daily_returns, ticker)
 
     return render_template("adj_close_histo_plot.html", ticker=session.get("ticker_symbol"),
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css,
+                           mean=mean, std=std)
 
 
 @main.route('/mov_av_20day_plot')

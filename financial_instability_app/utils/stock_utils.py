@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def normalize_data(df):
     """Normalize stock prices using the first row of the dataframe"""
     return df/df.ix[0, :]
@@ -66,3 +69,17 @@ def calculate_rolling_std(df, window, column_name=''):
         df['rolling_std'] = df[column_name].rolling(window=window, center=False).std()
         return df
     return df.rolling(window=window, center=False).std()
+
+
+def find_beta_alpha(df, col_name1, col_name2):
+    beta, alpha = np.polyfit(df[col_name1], df[col_name2], 1)
+    return beta, alpha
+
+
+def calculate_correlation(df, stock1, stock2):
+    corr_matrix = calculate_correlation_matrix(df)
+    return corr_matrix[stock1][stock2]
+
+
+def calculate_correlation_matrix(df):
+    return df.corr(method='pearson')

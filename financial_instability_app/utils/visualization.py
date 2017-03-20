@@ -29,14 +29,14 @@ def generate_candlestick_plot(df, ticker):
 
 def generate_adj_close_histo_plot(df, ticker):
     # little hack here since Bokeh seems to get weird if numbers are too small...
+    column = "AdjClose_" + ticker
     df *= 100
-    column = "AdjClose_"+ticker
     p = Histogram(df, values=column, bins=10)
 
     mean = df[column].mean()
-    print mean
+    # print mean
     std = df[column].std()
-    print std
+    # print std
 
     mean_line = Span(location=mean, dimension='height', line_color='black', line_width=3)
     std_line_left = Span(location=-std, dimension='height', line_color='blue', line_dash="dashed", line_width=3)
@@ -49,7 +49,7 @@ def generate_adj_close_histo_plot(df, ticker):
     cdn_js = CDN.js_files[0]
     cdn_css = CDN.css_files[0]
 
-    return generated_script, div_tag, cdn_js, cdn_css
+    return generated_script, div_tag, cdn_js, cdn_css, mean/100, std/100
 
 
 def generate_single_line_plot(df, column, ticker):
@@ -76,6 +76,25 @@ def generate_multi_line_plot(df, tickers, labels):
     cdn_css = CDN.css_files[0]
 
     return generated_script, div_tag, cdn_js, cdn_css
+
+
+def generate_corr_plot(df, tickers):
+    ticker1 = tickers[0]
+    ticker2 = tickers[1]
+    p = figure(x_axis_label=ticker1, y_axis_label=ticker2, width=1200, height=600, responsive=True)
+    p.grid.grid_line_alpha = 0.3
+    p.circle(df[ticker1], df[ticker2], size=5, alpha=0.5)
+
+    beta, alpha = stock_utils.find_beta_alpha(df, ticker1, ticker2)
+    pearson_corr = stock_utils.calculate_correlation(df, ticker1, ticker2)
+
+    p.line(df[ticker1], beta*df[ticker1]+alpha, line_width=2, color='red')
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css, pearson_corr, ticker2
 
 
 def generate_bollinger_plot(df, ticker):

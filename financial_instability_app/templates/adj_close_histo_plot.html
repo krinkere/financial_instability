@@ -8,6 +8,8 @@
     <script type="text/javascript" src={{ cdn_js }}></script>
     <div class="page-header">
         <h1>Close Prices Histogram for <a class="redtext">{{ ticker }}</a></h1>
+        Mean: <a class="redtext">{{ mean }}</a>
+        Standard Deviation: <a class="redtext">{{ std }}</a>
     </div>
     {{ generated_script | safe }}
     {{ div_tag | safe }}

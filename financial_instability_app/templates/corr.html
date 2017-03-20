@@ -4,14 +4,12 @@
 {% block title %}Financial Instability{% endblock %}
 
 {% block page_content %}
+    <link rel="stylesheet" href={{ cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ cdn_js }}></script>
     <div class="page-header">
-        <h1>Correlation</h1>
-
-        <br>
-        <p>
-          Placeholder to display correlation for Stock Symbol: <b>{% if ticker %}{{ ticker|upper }}{% else %}N/A{% endif %}</b>
-          <br>
-          against the market (nasdaq, frankfurt, etc) or get S&P500 data off the web scrapping.
-        </p>
+        <h1>Correlation graph for <a class="redtext">{{ ticker }}</a> against {{ comp_ticket }}</h1>
+        Pearson Correlation: <a class="redtext">{{ pearson_corr }}</a>
     </div>
+    {{ generated_script | safe }}
+    {{ div_tag | safe }}
 {% endblock %}
