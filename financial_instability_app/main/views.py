@@ -1,4 +1,5 @@
 import datetime
+import os.path
 from flask import render_template, session, redirect, url_for, flash, make_response
 from . import main
 from .forms import TickerForm
@@ -8,6 +9,8 @@ from ..utils import retrieve_stock_info
 from ..utils import visualization
 from ..utils import df_utils
 from ..utils import stock_utils
+import pickle
+import pandas as pd
 
 
 # Define routes
@@ -149,7 +152,17 @@ def mov_av_plot(num_days):
 def adj_close_plot():
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
-    df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
+    timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
+    file_location = "pickle_jar/"+ticker+"_"+timestamp+"_yahoo.pickle"
+    print "file_name " + file_location
+    if os.path.exists(file_location):
+        # retrieve from pickle file
+        print "we have the file"
+        df = pd.read_pickle(file_location)
+    else:
+        print "new file"
+        df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
+        save_to_pickle(df, file_location)
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_single_line_plot(df, column='AdjClose_'+ticker,
                                                                                          ticker=ticker)
@@ -207,8 +220,18 @@ def us_comparison_plot_cum():
 def get_stock_data():
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
-    df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
-    df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker])
+    timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
+    file_location = "pickle_jar/"+ticker+"_"+timestamp+"_us.pickle"
+    print "file_name " + file_location
+    if os.path.exists(file_location):
+        # retrieve from pickle file
+        print "we have the file"
+        df = pd.read_pickle(file_location)
+    else:
+        print "new file"
+        df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
+        df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker])
+        save_to_pickle(df, file_location)
 
     return df, ticker
 
@@ -216,13 +239,29 @@ def get_stock_data():
 def us_get_comparison_data():
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
-
     tickers = [session.get("ticker_symbol"), 'SPY']
-    df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
-    df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker, 'AdjClose_SPY'])
-    df.columns = tickers
+
+    timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
+    file_location = "pickle_jar/"+ticker+"_"+timestamp+"_us.pickle"
+    print "file_name " + file_location
+    if os.path.exists(file_location):
+        # retrieve from pickle file
+        print "we have the file"
+        df = pd.read_pickle(file_location)
+    else:
+        print "new file"
+        df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
+        df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker, 'AdjClose_SPY'])
+        df.columns = tickers
+        save_to_pickle(df, file_location)
 
     return df, tickers, ticker
+
+
+def save_to_pickle(df, file_location):
+    pickle_out = open(file_location, 'wb')
+    pickle.dump(df, pickle_out)
+    pickle_out.close()
 
 
 @main.route('/global_comparison_plot_adjclose', methods=['GET'])
@@ -278,12 +317,21 @@ def get_global_comparison_data():
     print "WE HAVE A %s" % ticker
 
     tickers = [session.get("ticker_symbol"), 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
-    df = retrieve_stock_info.get_global_stock_data_from_web(ticker, start, end)
-    df = df_utils.slice_dataframe_by_columns(df,
-                                             ['AdjClose_' + ticker, 'AdjClose_^GDAXI',
-                                              'AdjClose_^FCHI', 'AdjClose_^HSI',
-                                              'AdjClose_^N225', 'AdjClose_^AXJO'])
-    df.columns = tickers
+    timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
+    file_location = "pickle_jar/"+ticker+"_"+timestamp+"_global.pickle"
+    print "file_name " + file_location
+    if os.path.exists(file_location):
+        # retrieve from pickle file
+        print "we have the file"
+        df = pd.read_pickle(file_location)
+    else:
+        df = retrieve_stock_info.get_global_stock_data_from_web(ticker, start, end)
+        df = df_utils.slice_dataframe_by_columns(df,
+                                                 ['AdjClose_' + ticker, 'AdjClose_^GDAXI',
+                                                  'AdjClose_^FCHI', 'AdjClose_^HSI',
+                                                  'AdjClose_^N225', 'AdjClose_^AXJO'])
+        df.columns = tickers
+        save_to_pickle(df, file_location)
 
     return df, tickers, ticker
 

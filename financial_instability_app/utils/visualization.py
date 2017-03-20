@@ -42,7 +42,6 @@ def generate_adj_close_histo_plot(df, ticker):
     std_line_left = Span(location=-std, dimension='height', line_color='blue', line_dash="dashed", line_width=3)
     std_line_right = Span(location=std, dimension='height', line_color='blue', line_dash="dashed", line_width=3)
 
-
     p.renderers.extend([mean_line, std_line_left, std_line_right])
 
     generated_script, div_tag = components(p)
