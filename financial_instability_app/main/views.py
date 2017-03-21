@@ -51,7 +51,9 @@ def index():
 @main.route('/corr', methods=['GET'])
 def corr():
     df, tickers, ticker = us_get_comparison_data()
+    print df.head()
     daily_returns = stock_utils.calculate_daily_returns(df)
+    print daily_returns.head()
 
     generated_script, div_tag, cdn_js, cdn_css, pearson_corr, comp_ticket \
         = visualization.generate_corr_plot(daily_returns, tickers)
@@ -67,8 +69,10 @@ def get_start_end_dates():
 
     if session.get("start_date"):
         start = session.get("start_date")
+        start = datetime.datetime.strptime(start, '%a, %d %b %Y %X GMT')
     if session.get("end_date"):
         end = session.get("end_date")
+        end = datetime.datetime.strptime(end, '%a, %d %b %Y %X GMT')
 
     return start, end
 
@@ -103,7 +107,11 @@ def bollinger_bands_plot():
 
 @main.route('/trade_volume_plot')
 def trade_volume_plot():
-    pass
+    df, ticker = get_stock_volume_data()
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_volume_bar_plot(df, ticker)
+
+    return render_template("volume_histo_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css)
 
 
 @main.route('/adj_close_histo_plot')
@@ -114,9 +122,8 @@ def adj_close_histo_plot():
     generated_script, div_tag, cdn_js, cdn_css, mean, std = \
         visualization.generate_adj_close_histo_plot(daily_returns, ticker)
 
-    return render_template("adj_close_histo_plot.html", ticker=session.get("ticker_symbol"),
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css,
-                           mean=mean, std=std)
+    return render_template("adj_close_histo_plot.html", ticker=ticker, generated_script=generated_script,
+                           div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css, mean=mean, std=std)
 
 
 @main.route('/mov_av_20day_plot')
@@ -152,15 +159,11 @@ def mov_av_plot(num_days):
 def adj_close_plot():
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
-    timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
-    file_location = "pickle_jar/"+ticker+"_"+timestamp+"_yahoo.pickle"
-    print "file_name " + file_location
+    file_location = "pickle_jar/"+ticker+"_"+start.strftime("%Y-%m-%d")+"_"+end.strftime("%Y-%m-%d")+"_yahoo.pickle"
     if os.path.exists(file_location):
         # retrieve from pickle file
-        print "we have the file"
         df = pd.read_pickle(file_location)
     else:
-        print "new file"
         df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
         save_to_pickle(df, file_location)
 
@@ -217,18 +220,32 @@ def us_comparison_plot_cum():
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
 
-def get_stock_data():
+def get_stock_volume_data():
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
-    timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
-    file_location = "pickle_jar/"+ticker+"_"+timestamp+"_us.pickle"
-    print "file_name " + file_location
+    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
+        "%Y-%m-%d") + "_yahoo_volume.pickle"
     if os.path.exists(file_location):
         # retrieve from pickle file
-        print "we have the file"
         df = pd.read_pickle(file_location)
     else:
-        print "new file"
+        df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
+        df = df_utils.slice_dataframe_by_columns(df, ['Volume_' + ticker])
+        save_to_pickle(df, file_location)
+
+    return df, ticker
+
+
+def get_stock_data():
+    start, end = get_start_end_dates()
+
+    ticker = session.get("ticker_symbol")
+    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
+        "%Y-%m-%d") + "_us.pickle"
+    if os.path.exists(file_location):
+        # retrieve from pickle file
+        df = pd.read_pickle(file_location)
+    else:
         df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
         df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker])
         save_to_pickle(df, file_location)
@@ -237,22 +254,23 @@ def get_stock_data():
 
 
 def us_get_comparison_data():
+    print "inside of us_get_comparison_data()"
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
     tickers = [session.get("ticker_symbol"), 'SPY']
 
-    timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
-    file_location = "pickle_jar/"+ticker+"_"+timestamp+"_us.pickle"
-    print "file_name " + file_location
+    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
+        "%Y-%m-%d") + "_us_corr.pickle"
     if os.path.exists(file_location):
         # retrieve from pickle file
-        print "we have the file"
+        print "file exists"
         df = pd.read_pickle(file_location)
+        print df.head()
     else:
-        print "new file"
         df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
         df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker, 'AdjClose_SPY'])
         df.columns = tickers
+        print df.head()
         save_to_pickle(df, file_location)
 
     return df, tickers, ticker
@@ -314,15 +332,12 @@ def global_comparison_plot_cum():
 def get_global_comparison_data():
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
-    print "WE HAVE A %s" % ticker
 
     tickers = [session.get("ticker_symbol"), 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
-    timestamp = datetime.datetime.today().strftime('%Y-%m-%d')
-    file_location = "pickle_jar/"+ticker+"_"+timestamp+"_global.pickle"
-    print "file_name " + file_location
+    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
+        "%Y-%m-%d") + "_global.pickle"
     if os.path.exists(file_location):
         # retrieve from pickle file
-        print "we have the file"
         df = pd.read_pickle(file_location)
     else:
         df = retrieve_stock_info.get_global_stock_data_from_web(ticker, start, end)
@@ -366,22 +381,22 @@ def simple():
     from matplotlib.figure import Figure
     from matplotlib.dates import DateFormatter
 
-    fig=Figure()
-    ax=fig.add_subplot(111)
-    x=[]
-    y=[]
-    now=datetime.datetime.now()
-    delta=datetime.timedelta(days=1)
+    fig = Figure()
+    ax = fig.add_subplot(111)
+    x = []
+    y = []
+    now = datetime.datetime.now()
+    delta = datetime.timedelta(days=1)
     for i in range(10):
         x.append(now)
-        now+=delta
+        now += delta
         y.append(random.randint(0, 1000))
     ax.plot_date(x, y, '-')
     ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
     fig.autofmt_xdate()
-    canvas=FigureCanvas(fig)
+    canvas = FigureCanvas(fig)
     png_output = StringIO.StringIO()
     canvas.print_png(png_output)
-    response=make_response(png_output.getvalue())
+    response = make_response(png_output.getvalue())
     response.headers['Content-Type'] = 'image/png'
     return response

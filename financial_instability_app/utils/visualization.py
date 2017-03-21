@@ -1,7 +1,7 @@
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.resources import CDN
-from bokeh.charts import Histogram
+from bokeh.charts import Histogram, Bar
 from bokeh.models import Span
 import matplotlib.pyplot as plt
 import stock_utils
@@ -19,6 +19,24 @@ def generate_candlestick_plot(df, ticker):
     p.rect(df.index[df['Status_'+ticker] == 'Decrease'], df['Middle_'+ticker][df['Status_'+ticker] == 'Decrease'],
            hours_12, df['Height_'+ticker][df['Status_'+ticker] == 'Decrease'], fill_color='red', line_color='black')
     p.segment(df.index, df['High_'+ticker], df.index, df['Low_'+ticker], color='Black')
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css
+
+
+def generate_volume_bar_plot(df, ticker):
+    print df.head()
+    df /= 100
+    df = df.resample('M').mean()
+    df.index.name = 'DATE'
+    df = df.reset_index()
+    df.DATE = df.DATE.apply(lambda x: str(x).split(' 00:00:00')[0])
+    column = "Volume_" + ticker
+    print df.head()
+    p = Bar(df, values=column, xlabel='Date', label='DATE', ylabel='Volume (in thousands)', legend=False)
 
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]
@@ -78,8 +96,11 @@ def generate_multi_line_plot(df, tickers, labels):
 
 
 def generate_corr_plot(df, tickers):
+    print df.head()
     ticker1 = tickers[0]
+    print ticker1
     ticker2 = tickers[1]
+    print ticker2
     p = figure(x_axis_label=ticker1, y_axis_label=ticker2, width=1200, height=600, responsive=True)
     p.grid.grid_line_alpha = 0.3
     p.circle(df[ticker1], df[ticker2], size=5, alpha=0.5)
