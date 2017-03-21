@@ -51,9 +51,7 @@ def index():
 @main.route('/corr', methods=['GET'])
 def corr():
     df, tickers, ticker = us_get_comparison_data()
-    print df.head()
     daily_returns = stock_utils.calculate_daily_returns(df)
-    print daily_returns.head()
 
     generated_script, div_tag, cdn_js, cdn_css, pearson_corr, comp_ticket \
         = visualization.generate_corr_plot(daily_returns, tickers)
@@ -254,7 +252,6 @@ def get_stock_data():
 
 
 def us_get_comparison_data():
-    print "inside of us_get_comparison_data()"
     start, end = get_start_end_dates()
     ticker = session.get("ticker_symbol")
     tickers = [session.get("ticker_symbol"), 'SPY']
@@ -263,14 +260,11 @@ def us_get_comparison_data():
         "%Y-%m-%d") + "_us_corr.pickle"
     if os.path.exists(file_location):
         # retrieve from pickle file
-        print "file exists"
         df = pd.read_pickle(file_location)
-        print df.head()
     else:
         df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
         df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker, 'AdjClose_SPY'])
         df.columns = tickers
-        print df.head()
         save_to_pickle(df, file_location)
 
     return df, tickers, ticker

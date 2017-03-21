@@ -28,15 +28,13 @@ def generate_candlestick_plot(df, ticker):
 
 
 def generate_volume_bar_plot(df, ticker):
-    print df.head()
-    df /= 100
+    df /= 1000000
     df = df.resample('M').mean()
     df.index.name = 'DATE'
     df = df.reset_index()
     df.DATE = df.DATE.apply(lambda x: str(x).split(' 00:00:00')[0])
     column = "Volume_" + ticker
-    print df.head()
-    p = Bar(df, values=column, xlabel='Date', label='DATE', ylabel='Volume (in thousands)', legend=False)
+    p = Bar(df, values=column, xlabel='Date', label='DATE', ylabel='Volume (in millions)', legend=False)
 
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]
@@ -52,9 +50,7 @@ def generate_adj_close_histo_plot(df, ticker):
     p = Histogram(df, values=column, bins=10)
 
     mean = df[column].mean()
-    # print mean
     std = df[column].std()
-    # print std
 
     mean_line = Span(location=mean, dimension='height', line_color='black', line_width=3)
     std_line_left = Span(location=-std, dimension='height', line_color='blue', line_dash="dashed", line_width=3)
@@ -96,11 +92,8 @@ def generate_multi_line_plot(df, tickers, labels):
 
 
 def generate_corr_plot(df, tickers):
-    print df.head()
     ticker1 = tickers[0]
-    print ticker1
     ticker2 = tickers[1]
-    print ticker2
     p = figure(x_axis_label=ticker1, y_axis_label=ticker2, width=1200, height=600, responsive=True)
     p.grid.grid_line_alpha = 0.3
     p.circle(df[ticker1], df[ticker2], size=5, alpha=0.5)
