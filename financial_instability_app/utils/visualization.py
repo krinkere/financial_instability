@@ -29,12 +29,14 @@ def generate_candlestick_plot(df, ticker):
 
 def generate_volume_bar_plot(df, ticker):
     df /= 1000000
-    df = df.resample('M').mean()
+    df = df.resample('M').sum()
+    # Bar chart doesn't accept `Timestamp` for x-axis categories.
+    # https://github.com/bokeh/bokeh/issues/3847
     df.index.name = 'DATE'
     df = df.reset_index()
     df.DATE = df.DATE.apply(lambda x: str(x).split(' 00:00:00')[0])
     column = "Volume_" + ticker
-    p = Bar(df, values=column, xlabel='Date', label='DATE', ylabel='Volume (in millions)', legend=False)
+    p = Bar(df, values=column, label='DATE', xlabel='', ylabel='Volume (in millions)', legend=False)
 
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]
