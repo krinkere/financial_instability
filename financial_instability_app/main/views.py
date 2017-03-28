@@ -1,4 +1,3 @@
-import datetime
 import os.path
 from flask import render_template, session, redirect, url_for, flash, make_response
 from . import main
@@ -9,31 +8,9 @@ from ..utils import retrieve_stock_info
 from ..utils import visualization
 from ..utils import df_utils
 from ..utils import stock_utils
-import pickle
+from ..utils import utils
 import pandas as pd
-import logging
-import time
-import functools
-
-logger = logging.getLogger("views")
-logger.setLevel(logging.INFO)
-fh = logging.FileHandler('logs/views.log')
-formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s",
-                              "%Y-%m-%d %H:%M:%S")
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-
-
-def log_time(function_name):
-    def log_it(func):
-        @functools.wraps(func)
-        def measure_and_log_time(*args, **kwargs):
-            start_time = time.time()
-            returned_view = func(*args, **kwargs)
-            logger.info("--- Function %s ran in %s seconds ---" % (function_name, time.time() - start_time))
-            return returned_view
-        return measure_and_log_time
-    return log_it
+import datetime
 
 
 # Define routes
@@ -72,7 +49,7 @@ def index():
 
 
 @main.route('/corr', methods=['GET'])
-@log_time("corr")
+@utils.log_time("corr")
 def corr():
     df, tickers, ticker = us_get_comparison_data()
     daily_returns = stock_utils.calculate_daily_returns(df)
@@ -85,25 +62,10 @@ def corr():
                            comp_ticket=comp_ticket)
 
 
-def get_start_end_dates():
-    start = datetime.datetime(2015, 1, 1)
-    end = datetime.date.today()
-
-    if session.get("start_date"):
-        start = session.get("start_date")
-        start = datetime.datetime.strptime(start, '%a, %d %b %Y %X GMT')
-    if session.get("end_date"):
-        end = session.get("end_date")
-        end = datetime.datetime.strptime(end, '%a, %d %b %Y %X GMT')
-
-    return start, end
-
-
 @main.route('/candle_plot', methods=['GET'])
-@log_time("candle_plot")
+@utils.log_time("candle_plot")
 def candle_plot():
-    start, end = get_start_end_dates()
-    ticker = session.get("ticker_symbol")
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
     df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_candlestick_plot(df, ticker)
@@ -113,9 +75,10 @@ def candle_plot():
 
 
 @main.route('/bollinger_bands_plot', methods=['GET'])
-@log_time("bollinger_bands_plot")
+@utils.log_time("bollinger_bands_plot")
 def bollinger_bands_plot():
-    df, ticker = get_stock_data()
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_stock_data(ticker, start, end)
     df = stock_utils.calculate_rolling_mean(df, column_name="AdjClose_"+ticker)
     df = stock_utils.calculate_bollinger_bands(df, column_name="AdjClose_"+ticker)
 
@@ -130,9 +93,10 @@ def bollinger_bands_plot():
 
 
 @main.route('/trade_volume_plot')
-@log_time("trade_volume_plot")
+@utils.log_time("trade_volume_plot")
 def trade_volume_plot():
-    df, ticker = get_stock_volume_data()
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_stock_volume_data(ticker, start, end)
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_volume_bar_plot(df, ticker)
 
     return render_template("volume_histo_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
@@ -140,9 +104,10 @@ def trade_volume_plot():
 
 
 @main.route('/adj_close_histo_plot')
-@log_time("adj_close_histo_plot")
+@utils.log_time("adj_close_histo_plot")
 def adj_close_histo_plot():
-    df, ticker = get_stock_data()
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_stock_data(ticker, start, end)
     daily_returns = stock_utils.calculate_daily_returns(df)
 
     generated_script, div_tag, cdn_js, cdn_css, mean, std = \
@@ -153,25 +118,26 @@ def adj_close_histo_plot():
 
 
 @main.route('/mov_av_20day_plot')
-@log_time("mov_av_20day_plot")
+@utils.log_time("mov_av_20day_plot")
 def mov_av_20day_plot():
     return mov_av_plot(20)
 
 
 @main.route('/mov_av_50day_plot')
-@log_time("mov_av_50day_plot")
+@utils.log_time("mov_av_50day_plot")
 def mov_av_50day_plot():
     return mov_av_plot(50)
 
 
 @main.route('/mov_av_200day_plot')
-@log_time("mov_av_200day_plot")
+@utils.log_time("mov_av_200day_plot")
 def mov_av_200day_plot():
     return mov_av_plot(200)
 
 
 def mov_av_plot(num_days):
-    df, ticker = get_stock_data()
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_stock_data(ticker, start, end)
     column_name = "AdjClose_" + ticker
     df = stock_utils.calculate_rolling_mean(df, window=num_days, column_name=column_name)
 
@@ -186,20 +152,19 @@ def mov_av_plot(num_days):
 
 
 @main.route('/adj_close_plot', methods=['GET'])
-@log_time("adj_close_plot")
+@utils.log_time("adj_close_plot")
 def adj_close_plot():
-    start, end = get_start_end_dates()
-    ticker = session.get("ticker_symbol")
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
     file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
         "%Y-%m-%d") + "_yahoo.pickle"
     if os.path.exists(file_location):
         # retrieve from pickle file
-        logger.info("retrieving information from pickle file %s" % file_location)
+        print ("retrieving information from pickle file %s" % file_location)
         df = pd.read_pickle(file_location)
     else:
-        logger.info("retrieving information for %s for time range %s - %s" % (ticker, start, end))
+        print ("retrieving information for %s for time range %s - %s" % (ticker, start, end))
         df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
-        save_to_pickle(df, file_location)
+        utils.save_to_pickle(df, file_location)
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_single_line_plot(df,
                                                                                          column='AdjClose_' + ticker,
@@ -209,7 +174,7 @@ def adj_close_plot():
 
 
 @main.route('/us_comparison_plot_adjclose', methods=['GET'])
-@log_time("us_comparison_plot_adjclose")
+@utils.log_time("us_comparison_plot_adjclose")
 def us_comparison_plot_adjclose():
     df, tickers, ticker = us_get_comparison_data()
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(df, tickers=tickers,
@@ -220,7 +185,7 @@ def us_comparison_plot_adjclose():
 
 
 @main.route('/us_comparison_plot_norm', methods=['GET'])
-@log_time("us_comparison_plot_norm")
+@utils.log_time("us_comparison_plot_norm")
 def us_comparison_plot_norm():
     df, tickers, ticker = us_get_comparison_data()
     normalized_data = stock_utils.normalize_data(df)
@@ -233,7 +198,7 @@ def us_comparison_plot_norm():
 
 
 @main.route('/us_comparison_plot_daily', methods=['GET'])
-@log_time("us_comparison_plot_daily")
+@utils.log_time("us_comparison_plot_daily")
 def us_comparison_plot_daily():
     df, tickers, ticker = us_get_comparison_data()
     daily_returns = stock_utils.calculate_daily_returns(df)
@@ -246,7 +211,7 @@ def us_comparison_plot_daily():
 
 
 @main.route('/us_comparison_plot_cum', methods=['GET'])
-@log_time("us_comparison_plot_cum")
+@utils.log_time("us_comparison_plot_cum")
 def us_comparison_plot_cum():
     df, tickers, ticker = us_get_comparison_data()
     cum_returns = stock_utils.calculate_cumulative_returns(df)
@@ -258,42 +223,8 @@ def us_comparison_plot_cum():
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
 
-def get_stock_volume_data():
-    start, end = get_start_end_dates()
-    ticker = session.get("ticker_symbol")
-    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
-        "%Y-%m-%d") + "_yahoo_volume.pickle"
-    if os.path.exists(file_location):
-        # retrieve from pickle file
-        df = pd.read_pickle(file_location)
-    else:
-        df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
-        df = df_utils.slice_dataframe_by_columns(df, ['Volume_' + ticker])
-        save_to_pickle(df, file_location)
-
-    return df, ticker
-
-
-def get_stock_data():
-    start, end = get_start_end_dates()
-
-    ticker = session.get("ticker_symbol")
-    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
-        "%Y-%m-%d") + "_us.pickle"
-    if os.path.exists(file_location):
-        # retrieve from pickle file
-        df = pd.read_pickle(file_location)
-    else:
-        df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
-        df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker])
-        save_to_pickle(df, file_location)
-
-    return df, ticker
-
-
 def us_get_comparison_data():
-    start, end = get_start_end_dates()
-    ticker = session.get("ticker_symbol")
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
     tickers = [session.get("ticker_symbol"), 'SPY']
 
     file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
@@ -305,19 +236,16 @@ def us_get_comparison_data():
         df = retrieve_stock_info.get_us_stock_data_from_web(ticker, start, end)
         df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker, 'AdjClose_SPY'])
         df.columns = tickers
-        save_to_pickle(df, file_location)
+        utils.save_to_pickle(df, file_location)
 
     return df, tickers, ticker
 
 
-def save_to_pickle(df, file_location):
-    pickle_out = open(file_location, 'wb')
-    pickle.dump(df, pickle_out)
-    pickle_out.close()
+
 
 
 @main.route('/global_comparison_plot_adjclose', methods=['GET'])
-@log_time("global_comparison_plot_adjclose")
+@utils.log_time("global_comparison_plot_adjclose")
 def global_comparison_plot_adjclose():
     df, tickers, ticker = get_global_comparison_data()
 
@@ -329,7 +257,7 @@ def global_comparison_plot_adjclose():
 
 
 @main.route('/global_comparison_plot_norm', methods=['GET'])
-@log_time("global_comparison_plot_norm")
+@utils.log_time("global_comparison_plot_norm")
 def global_comparison_plot_norm():
     df, tickers, ticker = get_global_comparison_data()
     normalized_data = stock_utils.normalize_data(df)
@@ -342,7 +270,7 @@ def global_comparison_plot_norm():
 
 
 @main.route('/global_comparison_plot_daily', methods=['GET'])
-@log_time("global_comparison_plot_daily")
+@utils.log_time("global_comparison_plot_daily")
 def global_comparison_plot_daily():
     df, tickers, ticker = get_global_comparison_data()
     daily_returns = stock_utils.calculate_daily_returns(df)
@@ -355,7 +283,7 @@ def global_comparison_plot_daily():
 
 
 @main.route('/global_comparison_plot_cum', methods=['GET'])
-@log_time("global_comparison_plot_cum")
+@utils.log_time("global_comparison_plot_cum")
 def global_comparison_plot_cum():
     df, tickers, ticker = get_global_comparison_data()
     cum_returns = stock_utils.calculate_cumulative_returns(df)
@@ -368,8 +296,7 @@ def global_comparison_plot_cum():
 
 
 def get_global_comparison_data():
-    start, end = get_start_end_dates()
-    ticker = session.get("ticker_symbol")
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
 
     tickers = [session.get("ticker_symbol"), 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
     file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
@@ -384,35 +311,35 @@ def get_global_comparison_data():
                                                   'AdjClose_^FCHI', 'AdjClose_^HSI',
                                                   'AdjClose_^N225', 'AdjClose_^AXJO'])
         df.columns = tickers
-        save_to_pickle(df, file_location)
+        utils.save_to_pickle(df, file_location)
 
     return df, tickers, ticker
 
 
 @main.route('/available_stocks', methods=['GET'])
-@log_time("available_stocks")
+@utils.log_time("available_stocks")
 def available_stocks():
     return render_template("available_stocks.html")
 
 
-@main.route('/stock_analysis', methods=['GET'])
-@log_time("stock_analysis")
-def stock_analysis():
-    start, end = get_start_end_dates()
-    aapl = retrieve_stock_info.get_stock_from_yahoo("AAPL", start, end)
-    goog = retrieve_stock_info.get_stock_from_yahoo("GOOG", start, end)
-    stocks = df_utils.join_dataframes(aapl, goog)
-
-    adj_close_data = df_utils.slice_dataframe_by_columns(stocks, ['AdjClose_AAPL', 'AdjClose_GOOG'])
-    adj_close_data.columns = ['AAPL', 'GOOG']
-
-    figdata_png = visualization.plot_stock_analysis(adj_close_data)
-    return render_template("stock_analysis.html", figdata_png=figdata_png)
+# @main.route('/stock_analysis', methods=['GET'])
+# @utils.log_time("stock_analysis")
+# def stock_analysis():
+#     start, end = utils.get_start_end_dates(session)
+#     aapl = retrieve_stock_info.get_stock_from_yahoo("AAPL", start, end)
+#     goog = retrieve_stock_info.get_stock_from_yahoo("GOOG", start, end)
+#     stocks = df_utils.join_dataframes(aapl, goog)
+#
+#     adj_close_data = df_utils.slice_dataframe_by_columns(stocks, ['AdjClose_AAPL', 'AdjClose_GOOG'])
+#     adj_close_data.columns = ['AAPL', 'GOOG']
+#
+#     figdata_png = visualization.plot_stock_analysis(adj_close_data)
+#     return render_template("stock_analysis.html", figdata_png=figdata_png)
 
 
 # Example of displaying a mathplotlib image
 @main.route('/test.png', methods=['GET'])
-@log_time("simple")
+@utils.log_time("simple")
 def simple():
     import datetime
     import StringIO

@@ -2,6 +2,9 @@ from datetime import datetime
 import df_utils
 import pandas_datareader.data as web
 import logging
+import utils
+import os.path
+import pandas as pd
 # Uncomment to decrease default level of logging to debug, ie. get the most data
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -12,6 +15,34 @@ formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s",
                               "%Y-%m-%d %H:%M:%S")
 fh.setFormatter(formatter)
 logger.addHandler(fh)
+
+
+def get_stock_volume_data(ticker, start, end):
+    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
+        "%Y-%m-%d") + "_yahoo_volume.pickle"
+    if os.path.exists(file_location):
+        # retrieve from pickle file
+        df = pd.read_pickle(file_location)
+    else:
+        df = get_stock_from_yahoo(ticker, start, end)
+        df = df_utils.slice_dataframe_by_columns(df, ['Volume_' + ticker])
+        utils.save_to_pickle(df, file_location)
+
+    return df
+
+
+def get_stock_data(ticker, start, end):
+    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
+        "%Y-%m-%d") + "_us.pickle"
+    if os.path.exists(file_location):
+        # retrieve from pickle file
+        df = pd.read_pickle(file_location)
+    else:
+        df = get_us_stock_data_from_web(ticker, start, end)
+        df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker])
+        utils.save_to_pickle(df, file_location)
+
+    return df
 
 
 def get_stock_from_yahoo(symbol, start, end):
