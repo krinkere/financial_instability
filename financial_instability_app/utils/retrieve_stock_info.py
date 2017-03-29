@@ -97,11 +97,6 @@ def get_global_comparison_data_df_generator(ticker, start, end):
 
 
 def get_stock_from_yahoo(symbol, start, end):
-    df = retrieve_data(symbol, start, end, "stock_from_yahoo", get_stock_from_yahoo_df_generator)
-    return df
-
-
-def get_stock_from_yahoo_df_generator(symbol, start, end):
     """
     Downloads Stock from Yahoo Finance.
     Returns pandas dataframe.
@@ -136,11 +131,6 @@ def append_symbol_to_columns(df, symbol_name):
 
 
 def get_us_stock_data_from_web(ticker, start, end):
-    df = retrieve_data(ticker, start, end, "us_stock_data_from_web", get_us_stock_data_from_web_df_generator)
-    return df
-
-
-def get_us_stock_data_from_web_df_generator(ticker, start, end):
     """
     Collects predictors data from Yahoo Finance and quandl.
     Returns a list of dataframes.
@@ -159,11 +149,6 @@ def get_us_stock_data_from_web_df_generator(ticker, start, end):
 
 
 def get_global_stock_data_from_web(ticker, start, end):
-    df = retrieve_data(ticker, start, end, "global_stock_data_from_web", get_global_stock_data_from_web_df_generator)
-    return df
-
-
-def get_global_stock_data_from_web_df_generator(ticker, start, end):
     """
     Collects predictors data from Yahoo Finance and quandl.
     Returns a list of dataframes.
