@@ -6,9 +6,9 @@ import pickle
 
 
 # logging
-logger = logging.getLogger("views")
+logger = logging.getLogger("utils")
 logger.setLevel(logging.INFO)
-fh = logging.FileHandler('logs/views.log')
+fh = logging.FileHandler('logs/run_time_metrics.log')
 formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s",
                               "%Y-%m-%d %H:%M:%S")
 fh.setFormatter(formatter)

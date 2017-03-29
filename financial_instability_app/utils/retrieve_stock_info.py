@@ -17,31 +17,81 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 
-def get_stock_volume_data(ticker, start, end):
+def retrieve_data(ticker, start, end, file_name, df_generator):
     file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
-        "%Y-%m-%d") + "_yahoo_volume.pickle"
+        "%Y-%m-%d") + "_" + file_name + ".pickle"
     if os.path.exists(file_location):
-        # retrieve from pickle file
+        # retrieve from pickle file]
+        logger.info("retrieving information from pickle file %s" % file_location)
         df = pd.read_pickle(file_location)
     else:
-        df = get_stock_from_yahoo(ticker, start, end)
-        df = df_utils.slice_dataframe_by_columns(df, ['Volume_' + ticker])
+        logger.info("retrieving information for %s for time range %s - %s" % (ticker, start, end))
+        df = df_generator(ticker, start, end)
         utils.save_to_pickle(df, file_location)
 
     return df
 
 
-def get_stock_data(ticker, start, end):
-    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
-        "%Y-%m-%d") + "_us.pickle"
-    if os.path.exists(file_location):
-        # retrieve from pickle file
-        df = pd.read_pickle(file_location)
-    else:
-        df = get_us_stock_data_from_web(ticker, start, end)
-        df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker])
-        utils.save_to_pickle(df, file_location)
+def get_stock_volume_data(ticker, start, end):
+    df = retrieve_data(ticker, start, end, "stock_volume_data", get_stock_volume_data_df_generator)
+    return df
 
+
+def get_stock_volume_data_df_generator(ticker, start, end):
+    df = get_stock_from_yahoo(ticker, start, end)
+    df = df_utils.slice_dataframe_by_columns(df, ['Volume_' + ticker])
+    return df
+
+
+def get_stock_data(ticker, start, end):
+    df = retrieve_data(ticker, start, end, "stock_data", get_stock_data_df_generator)
+    return df
+
+
+def get_stock_data_df_generator(ticker, start, end):
+    df = get_us_stock_data_from_web(ticker, start, end)
+    df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker])
+    return df
+
+
+def adj_close_data(ticker, start, end):
+    df = retrieve_data(ticker, start, end, "close_data", adj_close_plot_df_generator)
+    return df
+
+
+def adj_close_plot_df_generator(ticker, start, end):
+    df = get_stock_from_yahoo(ticker, start, end)
+    return df
+
+
+def us_get_comparison_data(ticker, start, end):
+    tickers = [ticker, 'SPY']
+    df = retrieve_data(ticker, start, end, "us_comparison_data", us_get_comparison_data_df_generator)
+    return df, tickers
+
+
+def us_get_comparison_data_df_generator(ticker, start, end):
+    tickers = [ticker, 'SPY']
+    df = get_us_stock_data_from_web(ticker, start, end)
+    df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker, 'AdjClose_SPY'])
+    df.columns = tickers
+    return df
+
+
+def get_global_comparison_data(ticker, start, end):
+    tickers = [ticker, 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
+    df = retrieve_data(ticker, start, end, "global_comparison_data", get_global_comparison_data)
+    return df, tickers
+
+
+def get_global_comparison_data(ticker, start, end):
+    tickers = [ticker, 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
+    df = get_global_stock_data_from_web(ticker, start, end)
+    df = df_utils.slice_dataframe_by_columns(df,
+                                             ['AdjClose_' + ticker, 'AdjClose_^GDAXI',
+                                              'AdjClose_^FCHI', 'AdjClose_^HSI',
+                                              'AdjClose_^N225', 'AdjClose_^AXJO'])
+    df.columns = tickers
     return df
 
 
