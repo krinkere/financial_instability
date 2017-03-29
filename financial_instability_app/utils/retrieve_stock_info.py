@@ -18,14 +18,15 @@ logger.addHandler(fh)
 
 
 def retrieve_data(ticker, start, end, file_name, df_generator):
-    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime(
-        "%Y-%m-%d") + "_" + file_name + ".pickle"
+    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime("%Y-%m-%d") + "_" + \
+                    file_name + ".pickle"
     if os.path.exists(file_location):
-        # retrieve from pickle file]
-        logger.info("retrieving information from pickle file %s" % file_location)
+        # retrieve from pickle file
+        logger.info("-- Retrieving from %s" % file_location)
         df = pd.read_pickle(file_location)
     else:
-        logger.info("retrieving information for %s for time range %s - %s" % (ticker, start, end))
+        logger.info("-- Web pull for %s [%s : %s]" % (ticker, start.strftime("%Y-%m-%d"),
+                                                                   end.strftime("%Y-%m-%d")))
         df = df_generator(ticker, start, end)
         utils.save_to_pickle(df, file_location)
 
@@ -64,13 +65,13 @@ def adj_close_plot_df_generator(ticker, start, end):
     return df
 
 
-def us_get_comparison_data(ticker, start, end):
+def get_us_comparison_data(ticker, start, end):
     tickers = [ticker, 'SPY']
-    df = retrieve_data(ticker, start, end, "us_comparison_data", us_get_comparison_data_df_generator)
+    df = retrieve_data(ticker, start, end, "us_comparison_data", get_us_comparison_data_df_generator)
     return df, tickers
 
 
-def us_get_comparison_data_df_generator(ticker, start, end):
+def get_us_comparison_data_df_generator(ticker, start, end):
     tickers = [ticker, 'SPY']
     df = get_us_stock_data_from_web(ticker, start, end)
     df = df_utils.slice_dataframe_by_columns(df, ['AdjClose_' + ticker, 'AdjClose_SPY'])
@@ -80,11 +81,11 @@ def us_get_comparison_data_df_generator(ticker, start, end):
 
 def get_global_comparison_data(ticker, start, end):
     tickers = [ticker, 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
-    df = retrieve_data(ticker, start, end, "global_comparison_data", get_global_comparison_data)
+    df = retrieve_data(ticker, start, end, "global_comparison_data", get_global_comparison_data_df_generator)
     return df, tickers
 
 
-def get_global_comparison_data(ticker, start, end):
+def get_global_comparison_data_df_generator(ticker, start, end):
     tickers = [ticker, 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
     df = get_global_stock_data_from_web(ticker, start, end)
     df = df_utils.slice_dataframe_by_columns(df,
@@ -96,13 +97,15 @@ def get_global_comparison_data(ticker, start, end):
 
 
 def get_stock_from_yahoo(symbol, start, end):
+    df = retrieve_data(symbol, start, end, "stock_from_yahoo", get_stock_from_yahoo_df_generator)
+    return df
+
+
+def get_stock_from_yahoo_df_generator(symbol, start, end):
     """
     Downloads Stock from Yahoo Finance.
-    Computes daily Returns based on Adj Close.
     Returns pandas dataframe.
     """
-    logger.info("Received %s for data range from %s until %s" % (symbol, start, end))
-
     df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
 
     def inc_dec(c, o):
@@ -133,6 +136,11 @@ def append_symbol_to_columns(df, symbol_name):
 
 
 def get_us_stock_data_from_web(ticker, start, end):
+    df = retrieve_data(ticker, start, end, "us_stock_data_from_web", get_us_stock_data_from_web_df_generator)
+    return df
+
+
+def get_us_stock_data_from_web_df_generator(ticker, start, end):
     """
     Collects predictors data from Yahoo Finance and quandl.
     Returns a list of dataframes.
@@ -151,6 +159,11 @@ def get_us_stock_data_from_web(ticker, start, end):
 
 
 def get_global_stock_data_from_web(ticker, start, end):
+    df = retrieve_data(ticker, start, end, "global_stock_data_from_web", get_global_stock_data_from_web_df_generator)
+    return df
+
+
+def get_global_stock_data_from_web_df_generator(ticker, start, end):
     """
     Collects predictors data from Yahoo Finance and quandl.
     Returns a list of dataframes.

@@ -1,4 +1,3 @@
-import os.path
 from flask import render_template, session, redirect, url_for, flash
 from . import main
 from .forms import TickerForm
@@ -8,7 +7,6 @@ from ..utils import retrieve_stock_info
 from ..utils import visualization
 from ..utils import stock_utils
 from ..utils import utils
-import pandas as pd
 import datetime
 
 
@@ -51,15 +49,14 @@ def index():
 @utils.log_time("corr")
 def corr():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.us_get_comparison_data(ticker, start, end)
+    df, tickers = retrieve_stock_info.get_us_comparison_data(ticker, start, end)
     daily_returns = stock_utils.calculate_daily_returns(df)
 
     generated_script, div_tag, cdn_js, cdn_css, pearson_corr, comp_ticket \
         = visualization.generate_corr_plot(daily_returns, tickers)
 
-    return render_template("corr.html", ticker=session.get("ticker_symbol"), generated_script=generated_script,
-                           div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css, pearson_corr=pearson_corr,
-                           comp_ticket=comp_ticket)
+    return render_template("corr.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css, pearson_corr=pearson_corr, comp_ticket=comp_ticket)
 
 
 @main.route('/candle_plot', methods=['GET'])
@@ -70,8 +67,8 @@ def candle_plot():
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_candlestick_plot(df, ticker)
 
-    return render_template("candle_stick.html", ticker=session.get("ticker_symbol"), generated_script=generated_script,
-                           div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return render_template("candle_stick.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css)
 
 
 @main.route('/bollinger_bands_plot', methods=['GET'])
@@ -84,8 +81,8 @@ def bollinger_bands_plot():
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_bollinger_plot(df, ticker)
 
-    return render_template("bollinger_bands_plot.html", ticker=session.get("ticker_symbol"),
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return render_template("bollinger_bands_plot.html", ticker=ticker, generated_script=generated_script,
+                           div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
 
 
 @main.route('/trade_volume_plot')
@@ -98,20 +95,6 @@ def trade_volume_plot():
 
     return render_template("volume_histo_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
                            cdn_js=cdn_js, cdn_css=cdn_css)
-
-
-@main.route('/adj_close_histo_plot')
-@utils.log_time("adj_close_histo_plot")
-def adj_close_histo_plot():
-    ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df = retrieve_stock_info.get_stock_data(ticker, start, end)
-    daily_returns = stock_utils.calculate_daily_returns(df)
-
-    generated_script, div_tag, cdn_js, cdn_css, mean, std = \
-        visualization.generate_adj_close_histo_plot(daily_returns, ticker)
-
-    return render_template("adj_close_histo_plot.html", ticker=ticker, generated_script=generated_script,
-                           div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css, mean=mean, std=std)
 
 
 @main.route('/mov_av_20day_plot')
@@ -139,10 +122,8 @@ def mov_av_plot(num_days):
     df = stock_utils.calculate_rolling_mean(df, window=num_days, column_name=column_name)
 
     tickers = ["rolling_mean", column_name]
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(df, tickers=tickers,
-                                                                                        labels=[str(num_days) +
-                                                                                                " day rolling mean",
-                                                                                                ticker])
+    generated_script, div_tag, cdn_js, cdn_css = \
+        visualization.generate_multi_line_plot(df, tickers=tickers, labels=[str(num_days) + "day rolling mean", ticker])
 
     return render_template("mov_av_plot.html", num_days=num_days, ticker=session.get("ticker_symbol"),
                            generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
@@ -157,119 +138,97 @@ def adj_close_plot():
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_single_line_plot(df,
                                                                                          column='AdjClose_' + ticker,
                                                                                          ticker=ticker)
-    return render_template("adj_close_plot.html", ticker=session.get("ticker_symbol"),
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return render_template("adj_close_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css)
+
+
+@main.route('/adj_close_histo_plot')
+@utils.log_time("adj_close_histo_plot")
+def adj_close_histo_plot():
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_stock_data(ticker, start, end)
+    daily_returns = stock_utils.calculate_daily_returns(df)
+
+    generated_script, div_tag, cdn_js, cdn_css, mean, std = \
+        visualization.generate_adj_close_histo_plot(daily_returns, ticker)
+
+    return render_template("adj_close_histo_plot.html", ticker=ticker, generated_script=generated_script,
+                           div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css, mean=mean, std=std)
 
 
 @main.route('/us_comparison_plot_adjclose', methods=['GET'])
 @utils.log_time("us_comparison_plot_adjclose")
 def us_comparison_plot_adjclose():
-    ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.us_get_comparison_data(ticker, start, end)
-
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(df, tickers=tickers,
-                                                                                        labels=tickers)
-
-    return render_template("comparison_plot.html", ticker=ticker, comparator_type="close prices", economy_type="U.S.",
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return comparison_plot(economy_type="U.S.", plot_type="adjclose")
 
 
 @main.route('/us_comparison_plot_norm', methods=['GET'])
 @utils.log_time("us_comparison_plot_norm")
 def us_comparison_plot_norm():
-    ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.us_get_comparison_data(ticker, start, end)
-    normalized_data = stock_utils.normalize_data(df)
-
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(normalized_data, tickers=tickers,
-                                                                                        labels=tickers)
-
-    return render_template("comparison_plot.html", ticker=ticker, comparator_type="normalized prices", economy_type="U.S.",
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return comparison_plot(economy_type="U.S.", plot_type="norm")
 
 
 @main.route('/us_comparison_plot_daily', methods=['GET'])
 @utils.log_time("us_comparison_plot_daily")
 def us_comparison_plot_daily():
-    ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.us_get_comparison_data(ticker, start, end)
-    daily_returns = stock_utils.calculate_daily_returns(df)
-
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(daily_returns, tickers=tickers,
-                                                                                        labels=tickers)
-
-    return render_template("comparison_plot.html", ticker=ticker, comparator_type="daily changes", economy_type="U.S.",
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return comparison_plot(economy_type="U.S.", plot_type="daily")
 
 
 @main.route('/us_comparison_plot_cum', methods=['GET'])
 @utils.log_time("us_comparison_plot_cum")
 def us_comparison_plot_cum():
-    ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.us_get_comparison_data(ticker, start, end)
-    cum_returns = stock_utils.calculate_cumulative_returns(df)
-
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(cum_returns, tickers=tickers,
-                                                                                        labels=tickers)
-
-    return render_template("comparison_plot.html", ticker=ticker, comparator_type="cumulative changes", economy_type="U.S.",
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return comparison_plot(economy_type="U.S.", plot_type="cum")
 
 
 @main.route('/global_comparison_plot_adjclose', methods=['GET'])
 @utils.log_time("global_comparison_plot_adjclose")
 def global_comparison_plot_adjclose():
-    ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.get_global_comparison_data(ticker, start, end)
-
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(df, tickers=tickers,
-                                                                                        labels=tickers)
-
-    return render_template("comparison_plot.html", ticker=ticker, comparator_type="close prices", economy_type="Global",
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return comparison_plot(economy_type="Global", plot_type="adjclose")
 
 
 @main.route('/global_comparison_plot_norm', methods=['GET'])
 @utils.log_time("global_comparison_plot_norm")
 def global_comparison_plot_norm():
-    ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.get_global_comparison_data(ticker, start, end)
-    normalized_data = stock_utils.normalize_data(df)
-
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(normalized_data, tickers=tickers,
-                                                                                        labels=tickers)
-
-    return render_template("comparison_plot.html", ticker=ticker, comparator_type="normalized prices", economy_type="Global",
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return comparison_plot(economy_type="Global", plot_type="norm")
 
 
 @main.route('/global_comparison_plot_daily', methods=['GET'])
 @utils.log_time("global_comparison_plot_daily")
 def global_comparison_plot_daily():
-    ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.get_global_comparison_data(ticker, start, end)
-    daily_returns = stock_utils.calculate_daily_returns(df)
-
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(daily_returns, tickers=tickers,
-                                                                                        labels=tickers)
-
-    return render_template("comparison_plot.html", ticker=ticker, comparator_type="daily changes", economy_type="Global",
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    return comparison_plot(economy_type="Global", plot_type="daily")
 
 
 @main.route('/global_comparison_plot_cum', methods=['GET'])
 @utils.log_time("global_comparison_plot_cum")
 def global_comparison_plot_cum():
+    return comparison_plot(economy_type="Global", plot_type="cum")
+
+
+def comparison_plot(economy_type, plot_type):
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df, tickers = retrieve_stock_info.get_global_comparison_data(ticker, start, end)
-    cum_returns = stock_utils.calculate_cumulative_returns(df)
+    if economy_type == "U.S.":
+        df, tickers = retrieve_stock_info.get_us_comparison_data(ticker, start, end)
+    else:
+        df, tickers = retrieve_stock_info.get_global_comparison_data(ticker, start, end)
 
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_multi_line_plot(cum_returns, tickers=tickers,
-                                                                                        labels=tickers)
+    if plot_type == "cum":
+        comparator_type = "cumulative changes"
+        df = stock_utils.calculate_cumulative_returns(df)
+    elif plot_type == "daily":
+        comparator_type = "daily changes"
+        df = stock_utils.calculate_daily_returns(df)
+    elif plot_type == "norm":
+        comparator_type = "normalized prices"
+        df = stock_utils.normalize_data(df)
+    elif plot_type == "adjclose":
+        comparator_type = "close prices"
 
-    return render_template("comparison_plot.html", ticker=ticker, comparator_type="cumulative changes", economy_type="Global",
-                           generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js, cdn_css=cdn_css)
+    generated_script, div_tag, cdn_js, cdn_css = \
+        visualization.generate_multi_line_plot(df, tickers=tickers, labels=tickers)
 
+    return render_template("comparison_plot.html", ticker=ticker, comparator_type=comparator_type,
+                           economy_type=economy_type, generated_script=generated_script, div_tag=div_tag, cdn_js=cdn_js,
+                           cdn_css=cdn_css)
 
 @main.route('/available_stocks', methods=['GET'])
 @utils.log_time("available_stocks")
