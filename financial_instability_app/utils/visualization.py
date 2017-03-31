@@ -144,7 +144,6 @@ def generate_heatline_graph(df_corr, heatmap_tickers, ticker):
 
 def generate_heatline(df_corr, heatmap_tickers, ticker):
     # this assumes that we are using it for S&P 500 that has around 500 tickers
-    print heatmap_tickers
     p0_50 = generate_heatline_graph(df_corr, heatmap_tickers[0:50], ticker)
     p50_100 = generate_heatline_graph(df_corr, heatmap_tickers[50:100], ticker)
     p100_150 = generate_heatline_graph(df_corr, heatmap_tickers[100:150], ticker)

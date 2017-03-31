@@ -126,7 +126,8 @@ def get_us_comparison_data_df_generator(ticker, start, end):
 
 def get_global_comparison_data(ticker, start, end):
     tickers = [ticker, 'Frankfurt', 'Paris', 'Hong Kong', 'Japan', 'Australia']
-    df = retrieve_data(ticker, start, end, "global_comparison_data", get_global_comparison_data_df_generator)
+    df = retrieve_data(ticker=ticker, start=start, end=end, file_name="global_comparison_data", file_prefix=ticker,
+                       df_generator=get_global_comparison_data_df_generator)
     return df, tickers
 
 
