@@ -76,6 +76,11 @@ def find_beta_alpha(df, col_name1, col_name2):
     return beta, alpha
 
 
+def generate_correlation_dataframe(df):
+    df_corr = df.corr()
+    return df_corr
+
+
 def calculate_correlation(df, stock1, stock2):
     corr_matrix = calculate_correlation_matrix(df)
     return corr_matrix[stock1][stock2]

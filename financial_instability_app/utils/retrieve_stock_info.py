@@ -5,6 +5,10 @@ import logging
 import utils
 import os.path
 import pandas as pd
+import requests
+import bs4 as bs
+from pandas_datareader._utils import RemoteDataError
+
 # Uncomment to decrease default level of logging to debug, ie. get the most data
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -17,8 +21,8 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 
-def retrieve_data(ticker, start, end, file_name, df_generator):
-    file_location = "pickle_jar/" + ticker + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime("%Y-%m-%d") + "_" + \
+def retrieve_data(ticker, start, end, file_name, file_prefix,  df_generator):
+    file_location = "pickle_jar/" + file_prefix + "_" + start.strftime("%Y-%m-%d") + "_" + end.strftime("%Y-%m-%d") + "_" + \
                     file_name + ".pickle"
     if os.path.exists(file_location):
         # retrieve from pickle file
@@ -29,12 +33,28 @@ def retrieve_data(ticker, start, end, file_name, df_generator):
                                                                    end.strftime("%Y-%m-%d")))
         df = df_generator(ticker, start, end)
         utils.save_to_pickle(df, file_location)
-
     return df
 
 
+def retrieve_sp500_tickers():
+    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+    soup = bs.BeautifulSoup(resp.text, 'lxml')
+
+    table = soup.find('table', {'class': 'wikitable sortable'})
+    tickers = []
+    for row in table.findAll('tr')[1:]:
+        ticker = row.findAll('td')[0].text
+        tickers.append(ticker)
+
+    #with open("sp500tickers.pickle", "wb") as f:
+    #    pickle.dump(tickers, f)
+    tickers = sorted(tickers)
+    return tickers
+
+
 def get_stock_volume_data(ticker, start, end):
-    df = retrieve_data(ticker, start, end, "stock_volume_data", get_stock_volume_data_df_generator)
+    df = retrieve_data(ticker=ticker, start=start, end=end, file_name="stock_volume_data", file_prefix=ticker,
+                       df_generator=get_stock_volume_data_df_generator)
     return df
 
 
@@ -45,7 +65,8 @@ def get_stock_volume_data_df_generator(ticker, start, end):
 
 
 def get_stock_data(ticker, start, end):
-    df = retrieve_data(ticker, start, end, "stock_data", get_stock_data_df_generator)
+    df = retrieve_data(ticker=ticker, start=start, end=end, file_name="stock_data", file_prefix=ticker,
+                       df_generator=get_stock_data_df_generator)
     return df
 
 
@@ -56,7 +77,8 @@ def get_stock_data_df_generator(ticker, start, end):
 
 
 def adj_close_data(ticker, start, end):
-    df = retrieve_data(ticker, start, end, "close_data", adj_close_plot_df_generator)
+    df = retrieve_data(ticker=ticker, start=start, end=end, file_name="close_data", file_prefix=ticker,
+                       df_generator=adj_close_plot_df_generator)
     return df
 
 
@@ -65,9 +87,32 @@ def adj_close_plot_df_generator(ticker, start, end):
     return df
 
 
+def get_comparison_data(tickers, start, end):
+    df = retrieve_data(ticker=tickers, start=start, end=end, file_name="comparison_data", file_prefix='-'.join(tickers),
+                       df_generator=get_comparison_data_df_generator)
+    return df
+
+
+def get_sp500_data(tickers, start, end):
+    df = retrieve_data(ticker=tickers, start=start, end=end, file_name="comparison_data",
+                       file_prefix="SP500crawl", df_generator=get_comparison_data_df_generator)
+    return df
+
+
+def get_comparison_data_df_generator(tickers, start, end):
+    df = get_stock_data_from_web(tickers, start, end)
+    columns = []
+    for ticker in tickers:
+        columns.append('AdjClose_' + ticker)
+    df = df_utils.slice_dataframe_by_columns(df, columns)
+    df.columns = tickers
+    return df
+
+
 def get_us_comparison_data(ticker, start, end):
     tickers = [ticker, 'SPY']
-    df = retrieve_data(ticker, start, end, "us_comparison_data", get_us_comparison_data_df_generator)
+    df = retrieve_data(ticker=ticker, start=start, end=end, file_name="us_comparison_data", file_prefix=ticker,
+                       df_generator=get_us_comparison_data_df_generator)
     return df, tickers
 
 
@@ -101,7 +146,10 @@ def get_stock_from_yahoo(symbol, start, end):
     Downloads Stock from Yahoo Finance.
     Returns pandas dataframe.
     """
-    df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
+    try:
+        df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
+    except RemoteDataError:
+        return None
 
     def inc_dec(c, o):
         if c > o:
@@ -126,6 +174,23 @@ def append_symbol_to_columns(df, symbol_name):
     df.columns.values[-4] = 'AdjClose'
     df.columns = df.columns + '_' + symbol_name
     df['DailyReturn_%s' % symbol_name] = df['AdjClose_%s' % symbol_name].pct_change()
+
+    return df
+
+
+def get_stock_data_from_web(tickers, start, end):
+    """
+    Collects predictors data from Yahoo Finance.
+    Returns a list of dataframes.
+    """
+    for i, ticker in enumerate(tickers):
+        print "current ticker %s " % ticker
+        curr_df = get_stock_from_yahoo(ticker, start, end)
+        if i == 0:
+            df = get_stock_from_yahoo(ticker, start, end)
+        else:
+            if curr_df is not None:
+                df = df_utils.join_dataframes(curr_df, df)
 
     return df
 

@@ -30,6 +30,12 @@ def log_time(function_name):
 # Date time
 def get_ticker_start_date_end_date(session):
     ticker = session.get("ticker_symbol")
+    start, end = get_start_date_end_date(session)
+
+    return ticker, start, end
+
+
+def get_start_date_end_date(session):
     start = datetime.datetime(2015, 1, 1)
     end = datetime.date.today()
 
@@ -40,8 +46,7 @@ def get_ticker_start_date_end_date(session):
         end = session.get("end_date")
         end = datetime.datetime.strptime(end, '%a, %d %b %Y %X GMT')
 
-    return ticker, start, end
-
+    return start, end
 
 # Pickle
 def save_to_pickle(df, file_location):

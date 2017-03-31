@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import stock_utils
 from colorsys import hsv_to_rgb
 import random
+from bokeh.models import LinearColorMapper, ColumnDataSource, HoverTool
+from math import pi
+from progressbar import ProgressBar
+import time
 
 
 def generate_candlestick_plot(df, ticker):
@@ -85,6 +89,57 @@ def generate_multi_line_plot(df, tickers, labels):
     p.grid.grid_line_alpha = 0.3
     for (color, ticker, label) in zip(area_colors, tickers, labels):
         p.line(df.index, df[ticker], line_width=2, legend=label, color=color)
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css
+
+
+def generate_heatmap(df_corr, heatmap_tickers):
+    colors = ["#75968f", "#a5bab7", "#c9d9d3", "#e2e2e2", "#dfccce", "#ddb7b1", "#cc7878", "#933b41", "#550b1d"]
+    mapper = LinearColorMapper(palette=list(reversed(colors)))
+
+    ticker_y_axis = []
+    ticker_x_axis = []
+    rate = []
+
+    pb = ProgressBar()
+
+    start_time = time.time()
+    for ticker_y in pb(heatmap_tickers):
+        for ticker_x in heatmap_tickers:
+            ticker_y_axis.append(ticker_y)
+            ticker_x_axis.append(ticker_x)
+            pearson_corr = df_corr[ticker_x][ticker_y]
+            rate.append(pearson_corr)
+    print("--- ran in %s seconds ---" % (time.time() - start_time))
+
+    source = ColumnDataSource(
+        data=dict(ticker_x=ticker_x_axis, ticker_y=ticker_y_axis, rate=rate)
+    )
+
+    tools = "hover,save,wheel_zoom,box_zoom,reset"
+
+    p = figure(x_range=heatmap_tickers, y_range=list(reversed(heatmap_tickers)), x_axis_location="above",
+               plot_width=1200, plot_height=600, tools=tools)
+    p.grid.grid_line_color = None
+    p.axis.axis_line_color = None
+    p.axis.major_tick_line_color = None
+    p.axis.major_label_text_font_size = "5pt"
+    p.axis.major_label_standoff = 0
+    p.xaxis.major_label_orientation = pi / 3
+
+    p.rect(x="ticker_x", y="ticker_y", width=1, height=1,
+           source=source,
+           fill_color={'field': 'rate', 'transform': mapper},
+           line_color=None)
+
+    p.select_one(HoverTool).tooltips = [
+        ('stocks', '@ticker_x - @ticker_y'),
+        ('corr', '@rate'),
+    ]
 
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]
