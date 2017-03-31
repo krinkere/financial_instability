@@ -183,14 +183,20 @@ def get_stock_data_from_web(tickers, start, end):
     Collects predictors data from Yahoo Finance.
     Returns a list of dataframes.
     """
+    logger.info("Received %r tickers" % len(tickers))
+    bad_tickers = []
     for i, ticker in enumerate(tickers):
-        print "current ticker %s " % ticker
+        logger.info("Processing ticker '%s'" % ticker)
         curr_df = get_stock_from_yahoo(ticker, start, end)
         if i == 0:
             df = get_stock_from_yahoo(ticker, start, end)
         else:
             if curr_df is not None:
                 df = df_utils.join_dataframes(curr_df, df)
+            else:
+                logger.warn("Ticker %s could not be retrieved from Yahoo Finance" % ticker)
+                bad_tickers.append(ticker)
+    logger.info("Could not process %r tickers. \n %r" % (len(bad_tickers), bad_tickers))
 
     return df
 

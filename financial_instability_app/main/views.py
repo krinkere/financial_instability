@@ -19,13 +19,21 @@ def index():
 
     def get_sector(ticker):
         tree = parse(urlopen('http://www.google.com/finance?&q=NASDAQ%3A' + ticker))
-        return tree.xpath("//a[@id='sector']")[0].text, tree.xpath("//a[@id='sector']")[0].getnext().text
+        try:
+            # Here I am going to assume that if we can't get sector, then it is invalid ticker
+            sect = tree.xpath("//a[@id='sector']")[0].text, tree.xpath("//a[@id='sector']")[0].getnext().text
+        except IndexError:
+            sect = None, None
+        return sect
 
     form = TickerForm()
     if form.validate_on_submit():
         ticker_symbol = Ticker.query.filter_by(ticker_symbol=form.ticker_symbol.data).first()
         if ticker_symbol is None:
             sector_name, industry_name = get_sector(form.ticker_symbol.data)
+            if sector_name is None:
+                flash("Invalid ticker [ %s ]" % form.ticker_symbol.data, "danger")
+                return redirect(url_for('main.index'))
             sector = Sector.query.filter_by(sector=sector_name, industry=industry_name).first()
             if sector is None:
                 sector = Sector(sector=sector_name, industry=industry_name)
@@ -40,7 +48,7 @@ def index():
         session["ticker_symbol"] = form.ticker_symbol.data
         session["start_date"] = form.start.data
         session["end_date"] = form.end.data
-        flash("Data is being retrieved for %s" % form.ticker_symbol.data)
+        flash("Data is being retrieved for %s" % form.ticker_symbol.data, "success")
         return redirect(url_for('main.index'))
     return render_template("index.html", form=form, ticker=session.get("ticker_symbol"),
                            current_time=datetime.datetime.utcnow(), known=session.get('known', False))
