@@ -79,7 +79,7 @@ def heatmap():
         print "%s is not present. adding..." % ticker
         df_ticker = retrieve_stock_info.get_comparison_data(tickers=[ticker], start=start, end=end)
         df = df_utils.join_dataframes(df, df_ticker)
-        heatmap_tickers = heatmap_tickers.insert(0, ticker)
+        heatmap_tickers.insert(0, ticker)
     else:
         print "%s is present. move it to front..." % ticker
         heatmap_tickers.remove(ticker)
@@ -94,6 +94,32 @@ def heatmap():
     return render_template("heatmap.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
                            cdn_js=cdn_js, cdn_css=cdn_css)
 
+
+@main.route('/heatline', methods=['GET'])
+def heatline():
+    heatmap_tickers = retrieve_stock_info.retrieve_sp500_tickers()
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+
+    df = retrieve_stock_info.get_sp500_data(tickers=heatmap_tickers, start=start, end=end)
+
+    if ticker not in heatmap_tickers:
+        print "%s is not present. adding..." % ticker
+        df_ticker = retrieve_stock_info.get_comparison_data(tickers=[ticker], start=start, end=end)
+        df = df_utils.join_dataframes(df, df_ticker)
+        heatmap_tickers.insert(0, ticker)
+    else:
+        print "%s is present. move it to front..." % ticker
+        heatmap_tickers.remove(ticker)
+        heatmap_tickers = list(heatmap_tickers)
+        heatmap_tickers.insert(0, ticker)
+        heatmap_tickers = list(heatmap_tickers)
+
+    df_corr = stock_utils.generate_correlation_dataframe(df)
+
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_heatline(df_corr, heatmap_tickers, ticker)
+
+    return render_template("heatline.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css)
 
 @main.route('/candle_plot', methods=['GET'])
 @utils.log_time("candle_plot")

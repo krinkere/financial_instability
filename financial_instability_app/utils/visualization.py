@@ -1,4 +1,5 @@
 from bokeh.plotting import figure
+from bokeh.io import vplot
 from bokeh.embed import components
 from bokeh.resources import CDN
 from bokeh.charts import Histogram, Bar
@@ -91,6 +92,73 @@ def generate_multi_line_plot(df, tickers, labels):
         p.line(df.index, df[ticker], line_width=2, legend=label, color=color)
 
     generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css
+
+
+def generate_heatline_graph(df_corr, heatmap_tickers, ticker):
+    colors = ["#75968f", "#a5bab7", "#c9d9d3", "#e2e2e2", "#dfccce", "#ddb7b1", "#cc7878", "#933b41", "#550b1d"]
+    mapper = LinearColorMapper(palette=list(reversed(colors)))
+
+    ticker_y_axis = []
+    ticker_x_axis = []
+    rate = []
+
+    for ticker_x in heatmap_tickers:
+        ticker_y = ticker
+        ticker_x_axis.append(ticker_x)
+        ticker_y_axis.append(ticker_y)
+        pearson_corr = df_corr[ticker_y][ticker_x]
+        rate.append(pearson_corr)
+
+    source = ColumnDataSource(
+        data=dict(ticker_x=ticker_x_axis, ticker_y=ticker_y_axis, rate=rate)
+    )
+
+    tools = 'hover'
+
+    # Remove first ticker from the list...
+    p = figure(x_range=heatmap_tickers[1:], y_range=[ticker], x_axis_location="above",
+               plot_width=1200, plot_height=110, tools=tools)
+    p.grid.grid_line_color = None
+    p.axis.axis_line_color = None
+    p.axis.major_tick_line_color = None
+    p.axis.major_label_text_font_size = "5pt"
+    p.axis.major_label_standoff = 0
+    p.xaxis.major_label_orientation = pi / 3
+
+    p.rect(x="ticker_x", y="ticker_y", width=1, height=1,
+           source=source,
+           fill_color={'field': 'rate', 'transform': mapper},
+           line_color=None)
+
+    p.select_one(HoverTool).tooltips = [
+        ('stocks', '@ticker_x'),
+        ('corr', '@rate'),
+    ]
+
+    return p
+
+
+def generate_heatline(df_corr, heatmap_tickers, ticker):
+    # this assumes that we are using it for S&P 500 that has around 500 tickers
+    print heatmap_tickers
+    p0_50 = generate_heatline_graph(df_corr, heatmap_tickers[0:50], ticker)
+    p50_100 = generate_heatline_graph(df_corr, heatmap_tickers[50:100], ticker)
+    p100_150 = generate_heatline_graph(df_corr, heatmap_tickers[100:150], ticker)
+    p150_200 = generate_heatline_graph(df_corr, heatmap_tickers[150:200], ticker)
+    p200_250 = generate_heatline_graph(df_corr, heatmap_tickers[200:250], ticker)
+    p250_300 = generate_heatline_graph(df_corr, heatmap_tickers[250:300], ticker)
+    p300_350 = generate_heatline_graph(df_corr, heatmap_tickers[300:350], ticker)
+    p350_400 = generate_heatline_graph(df_corr, heatmap_tickers[350:400], ticker)
+    p400_450 = generate_heatline_graph(df_corr, heatmap_tickers[400:450], ticker)
+    p450 = generate_heatline_graph(df_corr, heatmap_tickers[450:], ticker)
+
+    megaplot = vplot(p0_50, p50_100, p100_150, p150_200, p200_250, p250_300, p300_350, p350_400, p400_450, p450)
+
+    generated_script, div_tag = components(megaplot)
     cdn_js = CDN.js_files[0]
     cdn_css = CDN.css_files[0]
 
