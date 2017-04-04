@@ -119,8 +119,7 @@ def generate_heatline_graph(df_corr, heatmap_tickers, ticker):
 
     tools = 'hover'
 
-    # Remove first ticker from the list...
-    p = figure(x_range=heatmap_tickers[1:], y_range=[ticker], x_axis_location="above",
+    p = figure(x_range=heatmap_tickers, y_range=[ticker], x_axis_location="above",
                plot_width=1200, plot_height=110, tools=tools)
     p.grid.grid_line_color = None
     p.axis.axis_line_color = None
@@ -144,7 +143,7 @@ def generate_heatline_graph(df_corr, heatmap_tickers, ticker):
 
 def generate_heatline(df_corr, heatmap_tickers, ticker):
     # this assumes that we are using it for S&P 500 that has around 500 tickers
-    p0_50 = generate_heatline_graph(df_corr, heatmap_tickers[0:50], ticker)
+    p0_50 = generate_heatline_graph(df_corr, heatmap_tickers[1:50], ticker)
     p50_100 = generate_heatline_graph(df_corr, heatmap_tickers[50:100], ticker)
     p100_150 = generate_heatline_graph(df_corr, heatmap_tickers[100:150], ticker)
     p150_200 = generate_heatline_graph(df_corr, heatmap_tickers[150:200], ticker)

@@ -87,26 +87,45 @@ def adj_close_plot_df_generator(ticker, start, end):
     return df
 
 
-def get_comparison_data(tickers, start, end):
-    df = retrieve_data(ticker=tickers, start=start, end=end, file_name="comparison_data", file_prefix='-'.join(tickers),
-                       df_generator=get_comparison_data_df_generator)
+def get_adj_close_data(ticker, start, end):
+    df = retrieve_data(ticker=ticker, start=start, end=end, file_name="comparison_data",
+                       file_prefix='-'.join(ticker), df_generator=get_adj_close_data_df_generator)
+    return df
+
+
+def get_adj_close_data_df_generator(ticker, start, end):
+    df = get_adj_close_data_from_web(ticker, start, end)
     return df
 
 
 def get_sp500_data(tickers, start, end):
-    df = retrieve_data(ticker=tickers, start=start, end=end, file_name="comparison_data",
-                       file_prefix="SP500crawl", df_generator=get_comparison_data_df_generator)
-    return df
+    file_location = "pickle_jar/SP500crawl_" + start.strftime("%Y-%m-%d") + "_" + end.strftime("%Y-%m-%d") + "_"
+    sp500pickle = file_location+"sp500pickle.pickle"
+    validtickerspickle = file_location + "validtickerspickle.pickle"
+
+    if os.path.exists(sp500pickle):
+        # retrieve from pickle file
+        logger.info("-- Retrieving from %s" % sp500pickle)
+        df = pd.read_pickle(sp500pickle)
+        valid_tickers = pd.read_pickle(validtickerspickle)
+    else:
+        logger.info("-- Web pull for %s [%s : %s]" % ("S&P500", start.strftime("%Y-%m-%d"),
+                                                      end.strftime("%Y-%m-%d")))
+        df, valid_tickers = get_sp500_data_df_generator(tickers, start, end)
+        utils.save_to_pickle(df, sp500pickle)
+        utils.save_to_pickle(valid_tickers, validtickerspickle)
+
+    return df, valid_tickers
 
 
-def get_comparison_data_df_generator(tickers, start, end):
-    df = get_stock_data_from_web(tickers, start, end)
+def get_sp500_data_df_generator(tickers, start, end):
+    df, valid_tickers = get_stock_data_from_web(tickers, start, end)
     columns = []
-    for ticker in tickers:
+    for ticker in valid_tickers:
         columns.append('AdjClose_' + ticker)
     df = df_utils.slice_dataframe_by_columns(df, columns)
-    df.columns = tickers
-    return df
+    df.columns = valid_tickers
+    return df, valid_tickers
 
 
 def get_us_comparison_data(ticker, start, end):
@@ -199,6 +218,14 @@ def get_stock_data_from_web(tickers, start, end):
                 bad_tickers.append(ticker)
     logger.info("Could not process %r tickers. \n %r" % (len(bad_tickers), bad_tickers))
 
+    good_tickers = [ticker for ticker in tickers if ticker not in bad_tickers]
+    return df, good_tickers
+
+
+def get_adj_close_data_from_web(ticker, start, end):
+    logger.info("Processing ticker '%s'" % ticker)
+    df = get_stock_from_yahoo(ticker, start, end)
+    df = df.ix[:, 'AdjClose_' + ticker]
     return df
 
 

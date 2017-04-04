@@ -73,23 +73,23 @@ def heatmap():
     heatmap_tickers = retrieve_stock_info.retrieve_sp500_tickers()
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
 
-    df = retrieve_stock_info.get_sp500_data(tickers=heatmap_tickers, start=start, end=end)
+    df, valid_tickers = retrieve_stock_info.get_sp500_data(tickers=heatmap_tickers, start=start, end=end)
 
-    if ticker not in heatmap_tickers:
+    if ticker not in valid_tickers:
         print "%s is not present. adding..." % ticker
-        df_ticker = retrieve_stock_info.get_comparison_data(tickers=[ticker], start=start, end=end)
+        df_ticker = retrieve_stock_info.get_adj_close_data(ticker=ticker, start=start, end=end)
         df = df_utils.join_dataframes(df, df_ticker)
-        heatmap_tickers.insert(0, ticker)
+        valid_tickers.insert(0, ticker)
     else:
         print "%s is present. move it to front..." % ticker
-        heatmap_tickers.remove(ticker)
-        heatmap_tickers = list(heatmap_tickers)
-        heatmap_tickers.insert(0, ticker)
-        heatmap_tickers = list(heatmap_tickers)
+        valid_tickers.remove(ticker)
+        valid_tickers = list(valid_tickers)
+        valid_tickers.insert(0, ticker)
+        valid_tickers = list(valid_tickers)
 
     df_corr = stock_utils.generate_correlation_dataframe(df)
 
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_heatmap(df_corr, heatmap_tickers)
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_heatmap(df_corr, valid_tickers)
 
     return render_template("heatmap.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
                            cdn_js=cdn_js, cdn_css=cdn_css)
@@ -100,26 +100,38 @@ def heatline():
     heatmap_tickers = retrieve_stock_info.retrieve_sp500_tickers()
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
 
-    df = retrieve_stock_info.get_sp500_data(tickers=heatmap_tickers, start=start, end=end)
+    df, valid_tickers = retrieve_stock_info.get_sp500_data(tickers=heatmap_tickers, start=start, end=end)
 
-    if ticker not in heatmap_tickers:
+    if ticker not in valid_tickers:
         print "%s is not present. adding..." % ticker
-        df_ticker = retrieve_stock_info.get_comparison_data(tickers=[ticker], start=start, end=end)
+        df_ticker = retrieve_stock_info.get_adj_close_data(ticker=ticker, start=start, end=end)
         df = df_utils.join_dataframes(df, df_ticker)
-        heatmap_tickers.insert(0, ticker)
+        valid_tickers.insert(0, ticker)
     else:
         print "%s is present. move it to front..." % ticker
-        heatmap_tickers.remove(ticker)
-        heatmap_tickers = list(heatmap_tickers)
-        heatmap_tickers.insert(0, ticker)
-        heatmap_tickers = list(heatmap_tickers)
+        valid_tickers.remove(ticker)
+        valid_tickers = list(valid_tickers)
+        valid_tickers.insert(0, ticker)
+        valid_tickers = list(valid_tickers)
 
     df_corr = stock_utils.generate_correlation_dataframe(df)
+    df_corr = df_corr.dropna()
 
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_heatline(df_corr, heatmap_tickers, ticker)
+    sorted_by_ticker_df = df_corr.sort_values(ticker)
+    sorted_by_ticker_df = sorted_by_ticker_df[sorted_by_ticker_df.index != ticker]
+
+    neg_corr_df = sorted_by_ticker_df[ticker].head()
+    pos_corr_df = sorted_by_ticker_df[ticker].tail()
+    mask = (sorted_by_ticker_df[ticker] > -0.005) & (sorted_by_ticker_df[ticker] < 0.005)
+    # no_corr_df = sorted_by_ticker_df[ticker].between(-0.005, 0.005, inclusive=False)
+    no_corr_df = sorted_by_ticker_df[ticker].loc[mask]
+
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_heatline(df_corr, valid_tickers, ticker)
 
     return render_template("heatline.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
-                           cdn_js=cdn_js, cdn_css=cdn_css)
+                           cdn_js=cdn_js, cdn_css=cdn_css, neg_corr_df=neg_corr_df, pos_corr_df=pos_corr_df,
+                           no_corr_df=no_corr_df)
+
 
 @main.route('/candle_plot', methods=['GET'])
 @utils.log_time("candle_plot")

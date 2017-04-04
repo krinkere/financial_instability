@@ -10,6 +10,35 @@
         <h1>Heat line for <a class="redtext">{{ ticker }}</a> against
             <a href="https://en.wikipedia.org/wiki/List_of_S%26P_500_companies">S&P 500 companies</a></h1>
     </div>
+    <div>
+
+        <table width="100" border="1" style="float:left;">
+            {% for i in neg_corr_df.index %}
+            <tr>
+                <td>{{ i }}</td>
+                <td>{{ neg_corr_df[i] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <table width="100" border="1" style="float:left;">
+            {% for i in no_corr_df.index %}
+            <tr>
+                <td>{{ i }}</td>
+                <td>{{ no_corr_df[i] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <table width="100" border="1" >
+            {% for i in pos_corr_df.index %}
+            <tr>
+                <td>{{ i }}</td>
+                <td>{{ pos_corr_df[i] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+
+    </div>
     {{ generated_script | safe }}
     {{ div_tag | safe }}
 {% endblock %}
