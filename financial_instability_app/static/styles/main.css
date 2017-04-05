@@ -5,5 +5,53 @@
 }
 
 .redtext {
-        color: red;
+    color: red;
+}
+
+.corrTable {
+    width: 100px;
+    border: 2px solid;
+    float: left;
+    margin-right: 20px;
+}
+
+.corrTable th{
+    border: 1px solid;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: gray;
+}
+
+.corrTable tr{
+    border: 1px solid;
+}
+
+.corrTable td{
+    border: 1px solid;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.corrTableEnd {
+    width: 100px;
+    border: 2px solid;
+}
+
+.corrTableEnd th{
+    border: 1px solid;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: gray;
+}
+
+.corrTableEnd tr{
+    border: 1px solid;
+}
+
+.corrTableEnd td{
+    border: 1px solid;
+    padding-left: 10px;
+    padding-right: 10px;
 }

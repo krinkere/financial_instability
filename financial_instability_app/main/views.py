@@ -117,14 +117,26 @@ def heatline():
     df_corr = stock_utils.generate_correlation_dataframe(df)
     df_corr = df_corr.dropna()
 
-    sorted_by_ticker_df = df_corr.sort_values(ticker)
-    sorted_by_ticker_df = sorted_by_ticker_df[sorted_by_ticker_df.index != ticker]
-
-    neg_corr_df = sorted_by_ticker_df[ticker].head()
-    pos_corr_df = sorted_by_ticker_df[ticker].tail()
-    mask = (sorted_by_ticker_df[ticker] > -0.005) & (sorted_by_ticker_df[ticker] < 0.005)
-    # no_corr_df = sorted_by_ticker_df[ticker].between(-0.005, 0.005, inclusive=False)
-    no_corr_df = sorted_by_ticker_df[ticker].loc[mask]
+    # Remove ticker that is being analyzed
+    df_corr_results = df_corr[df_corr.index != ticker]
+    # Find negatively correlated tickers
+    df_corr_results = df_corr_results.sort_values(ticker, ascending=True)
+    neg_corr_df = df_corr_results[ticker][:5]
+    # Find positively correlated tickers
+    df_corr_results = df_corr_results.sort_values(ticker, ascending=False)
+    pos_corr_df = df_corr_results[ticker][:5]
+    no_corr_df_size = 0
+    no_corr_df_start = -0.005
+    no_corr_df_end = 0.005
+    while no_corr_df_size < 5:
+        # Find about 5 not correlated tickers
+        no_corr_range_df = df_corr_results[ticker].between(no_corr_df_start, no_corr_df_end, inclusive=False)
+        # Alternative way to get the range...
+        # mask = (sorted_by_ticker_df[ticker] > -0.005) & (sorted_by_ticker_df[ticker] < 0.005)
+        no_corr_df = df_corr_results[ticker].loc[no_corr_range_df]
+        no_corr_df_size = len(no_corr_df.index)
+        no_corr_df_start *= 2
+        no_corr_df_end *= 2
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_heatline(df_corr, valid_tickers, ticker)
 
