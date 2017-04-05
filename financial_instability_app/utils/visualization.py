@@ -134,8 +134,8 @@ def generate_heatline_graph(df_corr, heatmap_tickers, ticker):
            line_color=None)
 
     p.select_one(HoverTool).tooltips = [
-        ('stocks', '@ticker_x'),
-        ('corr', '@rate'),
+        ('Ticker', '@ticker_x'),
+        ('Correlation', '@rate'),
     ]
 
     return p
