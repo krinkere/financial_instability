@@ -55,3 +55,36 @@
     padding-left: 10px;
     padding-right: 10px;
 }
+
+.mlTable {
+    width: 100px;
+    border: 2px solid;
+    margin-right: 20px;
+}
+
+.mlTable th{
+    border: 1px solid;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: gray;
+}
+
+.mlTable tr{
+    border: 1px solid;
+}
+
+.mlTable td:first-child{
+    border: 1px solid;
+    padding-left: 10px;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+}
+
+.mlTable td{
+    border: 1px solid;
+    padding-left: 10px;
+    padding-right: 10px;
+    white-space: nowrap;
+}

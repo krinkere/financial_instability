@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Financial Instability{% endblock %}
+
+{% block page_content %}
+
+    <table class="mlTable">
+        <tr>
+            <th colspan="2">{{ ticker }}</th>
+        </tr>
+        <tr>
+            <td>Confidence</td>
+            <td>{{ confidence }}</td>
+        </tr>
+        <tr>
+            <td>Predicted Class Counts</td>
+            <td>{{ predictions }}</td>
+        </tr>
+        <tr>
+            <td>Data spread</td>
+            <td>{{ data_spread }}</td>
+        </tr>
+    </table>
+
+{% endblock %}

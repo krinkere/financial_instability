@@ -8,6 +8,7 @@ from ..utils import visualization
 from ..utils import stock_utils
 from ..utils import utils
 from ..utils import df_utils
+from ..utils import ml
 import datetime
 
 
@@ -93,6 +94,33 @@ def heatmap():
 
     return render_template("heatmap.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
                            cdn_js=cdn_js, cdn_css=cdn_css)
+
+
+@main.route('/temp', methods=['GET'])
+def temp():
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    heatmap_tickers = retrieve_stock_info.retrieve_sp500_tickers()
+
+    df, valid_tickers = retrieve_stock_info.get_sp500_data(tickers=heatmap_tickers, start=start, end=end)
+
+    if ticker not in valid_tickers:
+        print "%s is not present. adding..." % ticker
+        df_ticker = retrieve_stock_info.get_adj_close_data(ticker=ticker, start=start, end=end)
+        df = df_utils.join_dataframes(df, df_ticker)
+
+    confidence, predictions, data_spread = ml.run_trading_strategy_1(df, ticker)
+
+    return render_template("temp.html", ticker=ticker, confidence=confidence, predictions=predictions,
+                           data_spread=data_spread)
+
+
+
+
+
+
+
+
+
 
 
 @main.route('/heatline', methods=['GET'])
