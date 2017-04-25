@@ -114,13 +114,16 @@ def temp():
                            data_spread=data_spread)
 
 
+@main.route('/temp2', methods=['GET'])
+def temp2():
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.adj_close_data(ticker, start, end)
+    ml.run_trading_strategy_2(df, ticker)
 
 
-
-
-
-
-
+@main.route('/analysis_help')
+def analysis_help():
+    return render_template("analysis_help.html")
 
 
 @main.route('/heatline', methods=['GET'])

@@ -29,7 +29,7 @@ def calculate_cumulative_returns_from_daily(df):
     return df.cumsum()
 
 
-def calculate_rolling_mean(df, window=20, column_name=''):
+def calculate_rolling_mean(df, window=20, column_name='', result_column_name='rolling_mean'):
     """
     Rolling mean is a way to compute the mean over window of period. If you were to plot the rolling mean stats, you
     would be able to come up with a graph that generally follows the stock prices with certain lag.
@@ -39,7 +39,7 @@ def calculate_rolling_mean(df, window=20, column_name=''):
     time to buy. The challenge here is to guess where to buy the stock since it might still go down or up.
     """
     if column_name:
-        df['rolling_mean'] = df[column_name].rolling(window=window, center=False).mean()
+        df[result_column_name] = df[column_name].rolling(window=window, center=False).mean()
         return df
     return df.rolling(window=window, center=False).mean()
 
