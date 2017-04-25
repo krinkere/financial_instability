@@ -48,6 +48,7 @@ def get_start_date_end_date(session):
 
     return start, end
 
+
 # Pickle
 def save_to_pickle(df, file_location):
     pickle_out = open(file_location, 'wb')

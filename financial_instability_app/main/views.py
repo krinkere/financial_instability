@@ -118,7 +118,40 @@ def temp():
 def temp2():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
     df = retrieve_stock_info.adj_close_data(ticker, start, end)
-    ml.run_trading_strategy_2(df, ticker)
+    generated_script, div_tag, cdn_js, cdn_css = ml.run_trading_strategy_2(df, ticker)
+
+    return render_template("temp2.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css)
+
+
+@main.route('/temp3', methods=['GET'])
+def temp3():
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    # df = retrieve_stock_info.adj_close_data(ticker, start, end)
+    # Get more stocks
+    df_apple = retrieve_stock_info.adj_close_data("AAPL", start, end)
+    df_microsoft = retrieve_stock_info.adj_close_data("MSFT", start, end)
+    df_google = retrieve_stock_info.adj_close_data("GOOG", start, end)
+    df_facebook = retrieve_stock_info.adj_close_data("FB", start, end)
+    df_twitter = retrieve_stock_info.adj_close_data("TWTR", start, end)
+    df_netflix = retrieve_stock_info.adj_close_data("NFLX", start, end)
+    df_amazon = retrieve_stock_info.adj_close_data("AMZN", start, end)
+    df_yahoo = retrieve_stock_info.adj_close_data("YHOO", start, end)
+    df_sony = retrieve_stock_info.adj_close_data("SNY", start, end)
+    df_nintendo = retrieve_stock_info.adj_close_data("NTDOY", start, end)
+    df_ibm = retrieve_stock_info.adj_close_data("IBM", start, end)
+    df_hp = retrieve_stock_info.adj_close_data("HPQ", start, end)
+
+    df_market = retrieve_stock_info.adj_close_data("SPY", start, end)
+
+    stocks = [("AAPL", df_apple), ("MSFT", df_microsoft), ("GOOG", df_google), ("FB", df_facebook),
+              ("TWTR", df_twitter), ("NFLX", df_netflix), ("AMZN", df_amazon), ("YHOO", df_yahoo), ("SNY", df_sony),
+              ("NTDOY", df_nintendo), ("IBM", df_ibm), ("HPQ", df_hp)]
+
+    generated_script, div_tag, cdn_js, cdn_css = ml.run_trading_strategy_3(stocks, df_market)
+
+    return render_template("temp3.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css)
 
 
 @main.route('/analysis_help')
@@ -252,9 +285,8 @@ def adj_close_plot():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
     df = retrieve_stock_info.adj_close_data(ticker, start, end)
 
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_single_line_plot(df,
-                                                                                         column='AdjClose_' + ticker,
-                                                                                         ticker=ticker)
+    generated_script, div_tag, cdn_js, cdn_css = \
+        visualization.generate_single_line_plot(df, column='AdjClose_' + ticker)
     return render_template("adj_close_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
                            cdn_js=cdn_js, cdn_css=cdn_css)
 

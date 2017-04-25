@@ -72,7 +72,33 @@ def generate_adj_close_histo_plot(df, ticker):
     return generated_script, div_tag, cdn_js, cdn_css, mean/100, std/100
 
 
-def generate_single_line_plot(df, column, ticker):
+def generate_aggregated_plot_line_plot(df, column, comparison_df):
+    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
+    p.grid.grid_line_alpha = 0.3
+
+    aggregated_series = df[column].groupby(level=0).apply(lambda x: x[-1]) / 1000000
+
+    print aggregated_series
+
+    aggregated_df = aggregated_series.to_frame()
+    print aggregated_df.head()
+
+    p.line(aggregated_df.index, aggregated_df[column], line_width=2, legend="Portfolio", color="#75968f")
+    # market
+    blah = (comparison_df["AdjClose_SPY"] / comparison_df.ix[0, "AdjClose_SPY"])
+    print blah
+    blah_df = blah.to_frame()
+    print blah_df.head()
+    p.line(blah_df.index, blah_df["AdjClose_SPY"], line_width=2, legend="SPY", color="#cc7878")
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css
+
+
+def generate_single_line_plot(df, column):
     p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
     p.grid.grid_line_alpha = 0.3
     p.line(df.index, df[column], line_width=2)

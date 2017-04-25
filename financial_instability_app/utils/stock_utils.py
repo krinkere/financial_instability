@@ -88,3 +88,16 @@ def calculate_correlation(df, stock1, stock2):
 
 def calculate_correlation_matrix(df):
     return df.corr(method='pearson')
+
+
+def calculate_adj_rate(adj_close, close):
+    return adj_close / close
+
+
+def calculate_adj_numbers(df, ticker):
+    adj_rate = calculate_adj_rate(df['AdjClose_' + ticker], df['Close_' + ticker])
+    df['AdjOpen_' + ticker] = adj_rate * df['Open']
+    df['AdjHigh_' + ticker] = adj_rate * df['High']
+    df['AdjLow_' + ticker] = adj_rate * df['Low']
+
+    return df
