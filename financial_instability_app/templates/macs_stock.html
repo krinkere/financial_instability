@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Financial Instability{% endblock %}
+
+{% block page_content %}
+    <link rel="stylesheet" href={{ cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ cdn_js }}></script>
+    <div class="page-header">
+        <h1>Performance for <a class="redtext">{{ ticker }}</a> against the market (SPY 500)</h1>
+
+        <table class="mlTable">
+            <tr>
+                <th colspan="2">Backtesting results</th>
+            </tr>
+            <tr>
+                <td>Initial Value</td>
+                <td>{{ cash }}</td>
+            </tr>
+            <tr>
+                <td>Portfolio Value</td>
+                <td>{{ portfolio_value }}</td>
+            </tr>
+            <tr>
+                <td>Market (SPY 500) Value</td>
+                <td>{{ spy_portfolio_value  }}</td>
+            </tr>
+        </table>
+    </div>
+    {{ generated_script | safe }}
+    {{ div_tag | safe }}
+{% endblock %}

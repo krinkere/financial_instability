@@ -98,6 +98,31 @@ def generate_aggregated_plot_line_plot(df, column, comparison_df):
     return generated_script, div_tag, cdn_js, cdn_css
 
 
+def generate_comperative_plot_line_plot(df, column, ticker, comparison_df):
+    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
+    p.grid.grid_line_alpha = 0.3
+
+    blah2 = (df[column] / df.ix[0, column])
+    print blah2
+    blah2_df = blah2.to_frame()
+    print blah2_df.head()
+
+
+    p.line(blah2_df.index, blah2_df[column], line_width=2, legend=ticker, color="#75968f")
+    # market
+    blah = (comparison_df["AdjClose_SPY"] / comparison_df.ix[0, "AdjClose_SPY"])
+    print blah
+    blah_df = blah.to_frame()
+    print blah_df.head()
+    p.line(blah_df.index, blah_df["AdjClose_SPY"], line_width=2, legend="SPY", color="#cc7878")
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css
+
+
 def generate_single_line_plot(df, column):
     p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
     p.grid.grid_line_alpha = 0.3

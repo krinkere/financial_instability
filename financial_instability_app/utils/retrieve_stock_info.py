@@ -46,8 +46,6 @@ def retrieve_sp500_tickers():
         ticker = row.findAll('td')[0].text
         tickers.append(ticker)
 
-    #with open("sp500tickers.pickle", "wb") as f:
-    #    pickle.dump(tickers, f)
     tickers = sorted(tickers)
     return tickers
 

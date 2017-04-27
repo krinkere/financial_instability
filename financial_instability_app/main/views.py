@@ -114,18 +114,23 @@ def temp():
                            data_spread=data_spread)
 
 
-@main.route('/temp2', methods=['GET'])
-def temp2():
+@main.route('/macs_stock', methods=['GET'])
+def macs_stock():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
     df = retrieve_stock_info.adj_close_data(ticker, start, end)
-    generated_script, div_tag, cdn_js, cdn_css = ml.run_trading_strategy_2(df, ticker)
+    df_market = retrieve_stock_info.adj_close_data("SPY", start, end)
+    generated_script, div_tag, cdn_js, cdn_css, portfolio_value, spy_portfolio_value = \
+        ml.run_trading_strategy_2(df, ticker, df_market)
 
-    return render_template("temp2.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
-                           cdn_js=cdn_js, cdn_css=cdn_css)
+    cash = 1000000
+
+    return render_template("macs_stock.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css, portfolio_value='${:,.2f}'.format(portfolio_value),
+                           spy_portfolio_value='${:,.2f}'.format(spy_portfolio_value), cash='${:,.2f}'.format(cash))
 
 
-@main.route('/temp3', methods=['GET'])
-def temp3():
+@main.route('/macs_portfolio', methods=['GET'])
+def macs_portfolio():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
     # df = retrieve_stock_info.adj_close_data(ticker, start, end)
     # Get more stocks
@@ -148,10 +153,13 @@ def temp3():
               ("TWTR", df_twitter), ("NFLX", df_netflix), ("AMZN", df_amazon), ("YHOO", df_yahoo), ("SNY", df_sony),
               ("NTDOY", df_nintendo), ("IBM", df_ibm), ("HPQ", df_hp)]
 
-    generated_script, div_tag, cdn_js, cdn_css = ml.run_trading_strategy_3(stocks, df_market)
+    cash = 1000000
+    generated_script, div_tag, cdn_js, cdn_css, portfolio_value, spy_portfolio_value = \
+        ml.run_trading_strategy_3(stocks, df_market, cash=cash)
 
-    return render_template("temp3.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
-                           cdn_js=cdn_js, cdn_css=cdn_css)
+    return render_template("macs_portfolio.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css, portfolio_value='${:,.2f}'.format(portfolio_value),
+                           spy_portfolio_value='${:,.2f}'.format(spy_portfolio_value), cash='${:,.2f}'.format(cash))
 
 
 @main.route('/analysis_help')

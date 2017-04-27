@@ -91,7 +91,7 @@ def run_trading_strategy_1(df, ticker):
     return confidence, Counter(predictions), data_spread
 
 
-def run_trading_strategy_2(df, ticker):
+def run_trading_strategy_2(df, ticker, df_market, cash=1000000):
     column_name = "AdjClose_" + ticker
     # calculate fast moving average
     df = stock_utils.calculate_rolling_mean(df, window=20, column_name=column_name, result_column_name='20d')
@@ -179,7 +179,7 @@ def run_trading_strategy_2(df, ticker):
     print long_profits
 
     # Now we have all the information needed to simulate this strategy in long_profits
-    cash = 1000000
+    cash = cash
 
     backtest = pd.DataFrame({"Start Port. Value": [],
                              "End Port. Value": [],
@@ -224,10 +224,14 @@ def run_trading_strategy_2(df, ticker):
         cash = max(0, cash + profit)
 
     print backtest
+    portfolio_value = backtest["End Port. Value"][-1]
 
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_single_line_plot(backtest, "End Port. Value")
+    spy_portfolio_value = value_of_exchange_traded_fund(df_market, batch=batch)
 
-    return generated_script, div_tag, cdn_js, cdn_css
+    generated_script, div_tag, cdn_js, cdn_css = \
+        visualization.generate_comperative_plot_line_plot(backtest, "End Port. Value", ticker, df_market)
+
+    return generated_script, div_tag, cdn_js, cdn_css, portfolio_value, spy_portfolio_value
 
 
 def ma_crossover_orders(stocks, fast, slow):
@@ -381,14 +385,26 @@ def backtest(signals, cash, port_value=.1, batch=100):
     return results
 
 
-def run_trading_strategy_3(stocks, df_market, fast=20, slow=50):
+def value_of_exchange_traded_fund(df_market, batch=100):
+    # Maximum number of batches of stocks invested in
+    batches = 1000000 // np.ceil(100 * df_market.ix[0, "AdjClose_SPY"])
+    # How much money is used to buy SPY
+    trade_val = batches * batch * df_market.ix[0, "AdjClose_SPY"]
+    # Final value of the portfolio
+    final_val = batches * batch * df_market.ix[-1, "AdjClose_SPY"] + (1000000 - trade_val)
+    return final_val
+
+
+def run_trading_strategy_3(stocks, df_market, fast=20, slow=50, cash=1000000):
     signals = ma_crossover_orders(stocks, fast, slow)
 
     print signals
-
-    bk = backtest(signals, 1000000)
+    batch = 100
+    bk = backtest(signals, cash, batch=batch)
 
     print bk
+    portfolio_value = bk["Portfolio Value"][-1]
+    print portfolio_value
 
     # Backtesting is only part of evaluating the efficacy of a trading strategy. We would like to benchmark the
     # strategy, or compare it to other available (usually well-known) strategies in order to determine how well we have
@@ -400,4 +416,8 @@ def run_trading_strategy_3(stocks, df_market, fast=20, slow=50):
     # the stocks in the S&P 500 stock index. By buying and holding SPY, we are effectively trying to match our returns
     # with the market rather than beat it.
 
-    return visualization.generate_aggregated_plot_line_plot(bk, "Portfolio Value", df_market)
+    spy_portfolio_value = value_of_exchange_traded_fund(df_market, batch=batch)
+    generated_script, div_tag, cdn_js, cdn_css = \
+        visualization.generate_aggregated_plot_line_plot(bk, "Portfolio Value", df_market)
+
+    return generated_script, div_tag, cdn_js, cdn_css, portfolio_value, spy_portfolio_value

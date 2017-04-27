@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Financial Instability{% endblock %}
+
+{% block page_content %}
+    <link rel="stylesheet" href={{ cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ cdn_js }}></script>
+    <div class="page-header">
+        <h1>Portfolio Performance against the market (SPY 500)</h1>
+        <p>
+        <u>Portfolio consists of following stocks</u>: Apple (<strong>AAPL</strong>), Microsoft (<strong>MSFT</strong>),
+            Google (<strong>GOOG</strong>), Facebook (<strong>FB</strong>), Twitter (<strong>TWTR</strong>),
+            Netflix (<strong>NFLX</strong>), Amazon (<strong>AMZN</strong>), Yahoo (<strong>YHOO</strong>),
+            Sony (<strong>SNY</strong>), Nintendo (<strong>NTDOY</strong>), IBM (<strong>IBM</strong>),
+            HP (<strong>HPQ</strong>)
+        </p>
+
+        <table class="mlTable">
+            <tr>
+                <th colspan="2">Backtesting results</th>
+            </tr>
+            <tr>
+                <td>Initial Value</td>
+                <td>{{ cash }}</td>
+            </tr>
+            <tr>
+                <td>Portfolio Value</td>
+                <td>{{ portfolio_value }}</td>
+            </tr>
+            <tr>
+                <td>Market (SPY 500) Value</td>
+                <td>{{ spy_portfolio_value  }}</td>
+            </tr>
+        </table>
+    </div>
+    {{ generated_script | safe }}
+    {{ div_tag | safe }}
+{% endblock %}
