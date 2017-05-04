@@ -10,12 +10,16 @@ import requests
 import bs4 as bs
 from pandas_datareader._utils import RemoteDataError
 
+
 # Uncomment to decrease default level of logging to debug, ie. get the most data
 # logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger("retrieve_stock_info")
 logger.setLevel(logging.INFO)
-fh = logging.FileHandler('logs/retrieve_stock_info.log')
+log_path = os.path.abspath(os.path.dirname(__file__))
+blah = os.path.dirname(os.path.dirname(log_path))
+print blah
+fh = logging.FileHandler(blah+'/logs/retrieve_stock_info.log')
 formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s",
                               "%Y-%m-%d %H:%M:%S")
 fh.setFormatter(formatter)
@@ -37,14 +41,18 @@ def retrieve_data(ticker, start, end, file_name, file_prefix,  df_generator):
     return df
 
 
-def retrieve_sp500_tickers():
-    file_location = "pickle_jar/sp500list_" + time.strftime("%d%m%Y")
+def retrieve_sp500_tickers(pickle_jar_location="pickle_jar/", logit=True):
+    file_location = pickle_jar_location + "sp500list_" +time.strftime("%d%m%Y")+".pickle"
 
     if os.path.exists(file_location):
         # retrieve from pickle file
-        logger.info("-- Retrieving from %s" % file_location)
+        if logit:
+            logger.info("-- Retrieving from %s" % file_location)
+        else:
+            print("-- Retrieving from %s" % file_location)
         tickers = pd.read_pickle(file_location)
     else:
+        print "retrieve from wikipedia"
         resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
         soup = bs.BeautifulSoup(resp.text, 'lxml')
 
@@ -106,28 +114,35 @@ def get_adj_close_data_df_generator(ticker, start, end):
     return df
 
 
-def get_sp500_data(tickers, start, end):
-    file_location = "pickle_jar/SP500crawl_" + start.strftime("%Y-%m-%d") + "_" + end.strftime("%Y-%m-%d") + "_"
+def get_sp500_data(tickers, start, end, pickle_jar_location="pickle_jar/", logit=True):
+    file_location = pickle_jar_location + "SP500crawl_" + start.strftime("%Y-%m-%d") + "_" + end.strftime("%Y-%m-%d") + "_"
     sp500pickle = file_location+"sp500pickle.pickle"
     validtickerspickle = file_location + "validtickerspickle.pickle"
 
     if os.path.exists(sp500pickle):
         # retrieve from pickle file
-        logger.info("-- Retrieving from %s" % sp500pickle)
+        if logit:
+            logger.info("-- Retrieving from %s" % sp500pickle)
+        else:
+            print ("-- Retrieving from %s" % sp500pickle)
         df = pd.read_pickle(sp500pickle)
         valid_tickers = pd.read_pickle(validtickerspickle)
     else:
-        logger.info("-- Web pull for %s [%s : %s]" % ("S&P500", start.strftime("%Y-%m-%d"),
-                                                      end.strftime("%Y-%m-%d")))
-        df, valid_tickers = get_sp500_data_df_generator(tickers, start, end)
+        if logit:
+            logger.info("-- Web pull for %s [%s : %s]" % ("S&P500", start.strftime("%Y-%m-%d"),
+                                                          end.strftime("%Y-%m-%d")))
+        else:
+            print ("-- Web pull for %s [%s : %s]" % ("S&P500", start.strftime("%Y-%m-%d"),
+                                               end.strftime("%Y-%m-%d")))
+        df, valid_tickers = get_sp500_data_df_generator(tickers, start, end, logit=logit)
         utils.save_to_pickle(df, sp500pickle)
         utils.save_to_pickle(valid_tickers, validtickerspickle)
 
     return df, valid_tickers
 
 
-def get_sp500_data_df_generator(tickers, start, end):
-    df, valid_tickers = get_stock_data_from_web(tickers, start, end)
+def get_sp500_data_df_generator(tickers, start, end, logit=True):
+    df, valid_tickers = get_stock_data_from_web(tickers, start, end, logit=logit)
     columns = []
     for ticker in valid_tickers:
         columns.append('AdjClose_' + ticker)
@@ -206,15 +221,19 @@ def append_symbol_to_columns(df, symbol_name):
     return df
 
 
-def get_stock_data_from_web(tickers, start, end):
+def get_stock_data_from_web(tickers, start, end, logit=True):
     """
     Collects predictors data from Yahoo Finance.
     Returns a list of dataframes.
     """
-    logger.info("Received %r tickers" % len(tickers))
+    if logit:
+        logger.info("Received %r tickers" % len(tickers))
     bad_tickers = []
     for i, ticker in enumerate(tickers):
-        logger.info("Processing ticker '%s'" % ticker)
+        if logit:
+            logger.info("Processing ticker '%s'" % ticker)
+        else:
+            print ("Processing ticker '%s'" % ticker)
         curr_df = get_stock_from_yahoo(ticker, start, end)
         if i == 0:
             df = get_stock_from_yahoo(ticker, start, end)
@@ -222,9 +241,11 @@ def get_stock_data_from_web(tickers, start, end):
             if curr_df is not None:
                 df = df_utils.join_dataframes(curr_df, df)
             else:
-                logger.warn("Ticker %s could not be retrieved from Yahoo Finance" % ticker)
+                if logit:
+                    logger.warn("Ticker %s could not be retrieved from Yahoo Finance" % ticker)
                 bad_tickers.append(ticker)
-    logger.info("Could not process %r tickers. \n %r" % (len(bad_tickers), bad_tickers))
+    if logit:
+        logger.info("Could not process %r tickers. \n %r" % (len(bad_tickers), bad_tickers))
 
     good_tickers = [ticker for ticker in tickers if ticker not in bad_tickers]
     return df, good_tickers

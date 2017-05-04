@@ -5,22 +5,20 @@ import datetime
 import pickle
 
 
-# logging
-logger = logging.getLogger("utils")
-logger.setLevel(logging.INFO)
-fh = logging.FileHandler('logs/retrieve_stock_info.log')
-formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s",
-                              "%Y-%m-%d %H:%M:%S")
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-
-
 def log_time(function_name):
     def log_it(func):
         @functools.wraps(func)
         def measure_and_log_time(*args, **kwargs):
             start_time = time.time()
             returned_view = func(*args, **kwargs)
+            # logging
+            logger = logging.getLogger("utils")
+            logger.setLevel(logging.INFO)
+            fh = logging.FileHandler('logs/retrieve_stock_info.log')
+            formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s",
+                                          "%Y-%m-%d %H:%M:%S")
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
             logger.info("--- Function %s ran in %s seconds ---" % (function_name, time.time() - start_time))
             return returned_view
         return measure_and_log_time
@@ -36,7 +34,7 @@ def get_ticker_start_date_end_date(session):
 
 
 def get_start_date_end_date(session):
-    start = datetime.datetime(2015, 1, 1)
+    start = datetime.datetime(2016, 1, 1)
     end = datetime.date.today()
 
     if session.get("start_date"):
