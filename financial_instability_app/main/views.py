@@ -177,6 +177,7 @@ def heatline():
     if ticker not in valid_tickers:
         print "%s is not present. adding..." % ticker
         df_ticker = retrieve_stock_info.get_adj_close_data(ticker=ticker, start=start, end=end)
+        df_ticker.rename(ticker, inplace=True)
         df = df_utils.join_dataframes(df, df_ticker)
         valid_tickers.insert(0, ticker)
     else:

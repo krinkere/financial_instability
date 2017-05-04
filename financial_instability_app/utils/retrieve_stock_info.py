@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 import df_utils
 import pandas_datareader.data as web
 import logging
@@ -37,16 +38,25 @@ def retrieve_data(ticker, start, end, file_name, file_prefix,  df_generator):
 
 
 def retrieve_sp500_tickers():
-    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
-    soup = bs.BeautifulSoup(resp.text, 'lxml')
+    file_location = "pickle_jar/sp500list_" + time.strftime("%d%m%Y")
 
-    table = soup.find('table', {'class': 'wikitable sortable'})
-    tickers = []
-    for row in table.findAll('tr')[1:]:
-        ticker = row.findAll('td')[0].text
-        tickers.append(ticker)
+    if os.path.exists(file_location):
+        # retrieve from pickle file
+        logger.info("-- Retrieving from %s" % file_location)
+        tickers = pd.read_pickle(file_location)
+    else:
+        resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+        soup = bs.BeautifulSoup(resp.text, 'lxml')
 
-    tickers = sorted(tickers)
+        table = soup.find('table', {'class': 'wikitable sortable'})
+        tickers = []
+        for row in table.findAll('tr')[1:]:
+            ticker = row.findAll('td')[0].text
+            tickers.append(ticker)
+
+        tickers = sorted(tickers)
+        utils.save_to_pickle(tickers, file_location)
+
     return tickers
 
 
