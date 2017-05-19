@@ -1,6 +1,6 @@
-from flask import render_template, session, redirect, url_for, flash
+from flask import render_template, session, redirect, url_for, flash, request
 from . import main
-from .forms import TickerForm
+from .forms import TickerForm, CheckMediaForm
 from .. import db
 from ..models import Ticker, Sector, Portfolio
 from ..utils import retrieve_stock_info
@@ -291,13 +291,21 @@ def mov_av_plot(num_days):
 @main.route('/adj_close_plot', methods=['GET'])
 @utils.log_time("adj_close_plot")
 def adj_close_plot():
+    form = CheckMediaForm()
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
     df = retrieve_stock_info.adj_close_data(ticker, start, end)
 
     generated_script, div_tag, cdn_js, cdn_css = \
         visualization.generate_single_line_plot(df, column='AdjClose_' + ticker)
     return render_template("adj_close_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
-                           cdn_js=cdn_js, cdn_css=cdn_css)
+                           cdn_js=cdn_js, cdn_css=cdn_css, form=form, start=start, end=end)
+
+
+@main.route('/check_social_media', methods=['GET', 'POST'])
+def check_social_media():
+    form = request.form
+    return render_template("check_social_media.html", ticker=form['ticker_symbol'], start=form['start'],
+                           end=form['end'])
 
 
 @main.route('/adj_close_histo_plot')

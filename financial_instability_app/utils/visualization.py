@@ -124,9 +124,33 @@ def generate_comperative_plot_line_plot(df, column, ticker, comparison_df):
 
 
 def generate_single_line_plot(df, column):
-    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
+    from bokeh.models import CustomJS
+
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,box_select,save"
+    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True, tools=TOOLS)
     p.grid.grid_line_alpha = 0.3
     p.line(df.index, df[column], line_width=2)
+    p.tools[-2].callback = CustomJS(args=dict(p=p), code="""
+        var sel = cb_data["geometry"];
+        var startsec = sel["x0"]/1000;
+        var start = new Date(0);
+        start.setUTCSeconds(startsec);
+
+        var startfullstring = ("0" + start.getDate()).slice(-2) + "-" + ("0"+(start.getMonth()+1)).slice(-2) + "-" +start.getFullYear() + " " + ("0" + start.getHours()).slice(-2) + ":" + ("0" + start.getMinutes()).slice(-2);
+        var startstring = ("0" + start.getDate()).slice(-2) + "-" + ("0"+(start.getMonth()+1)).slice(-2) + "-" +start.getFullYear();
+
+        var finishsec = sel["x1"]/1000;
+        var finish = new Date(0);
+
+        finish.setUTCSeconds(finishsec)
+
+        var finishfullstring = ("0" + finish.getDate()).slice(-2) + "-" + ("0"+(finish.getMonth()+1)).slice(-2) + "-" +finish.getFullYear() + " " + ("0" + finish.getHours()).slice(-2) + ":" + ("0" + finish.getMinutes()).slice(-2);
+        var finishstring = ("0" + finish.getDate()).slice(-2) + "-" + ("0"+(finish.getMonth()+1)).slice(-2) + "-" +finish.getFullYear();
+
+        // alert('Selection range from '+startstring + ' to ' + finishstring);
+        document.getElementById("start").value = startstring;
+        document.getElementById("end").value = finishstring;
+    """)
 
     generated_script, div_tag = components(p)
     cdn_js = CDN.js_files[0]

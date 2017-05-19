@@ -5,6 +5,12 @@ import datetime
 from wtforms.fields.html5 import DateField
 
 
+class CheckMediaForm(Form):
+    ticker_symbol = StringField('Submit new stock symbol')
+    start = StringField('Start Date')
+    end = StringField('End Date')
+
+
 class TickerForm(Form):
     ticker_symbol = StringField('Submit new stock symbol', validators=[DataRequired()])
     start = DateField('Start Date', default=datetime.datetime(2016, 1, 1))
