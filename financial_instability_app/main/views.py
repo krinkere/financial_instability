@@ -303,9 +303,27 @@ def adj_close_plot():
 
 @main.route('/check_social_media', methods=['GET', 'POST'])
 def check_social_media():
+    from urllib import urlopen
+    from lxml.html import parse
+
+    def get_google_news(ticker, start, end):
+        # tree = parse(urlopen('http://www.google.com/finance?&q=NASDAQ%3A' + ticker))
+        tree = parse(urlopen('http://www.google.com/finance/company_news?q=NASDAQ%3A' + ticker + '&startdate=' + start
+                             + '&enddate=' + end + '&num=100'))
+        try:
+            # Here I am going to assume that if we can't get sector, then it is invalid ticker
+            # sect = tree.xpath("//a[@id='sector']")[0].text, tree.xpath("//a[@id='sector']")[0].getnext().text
+            sect = tree.xpath("//div[@id='news-main']")
+        except IndexError:
+            sect = None, None
+        return sect
+
     form = request.form
-    return render_template("check_social_media.html", ticker=form['ticker_symbol'], start=form['start'],
-                           end=form['end'])
+    ticker = form['ticker_symbol']
+    start = form['start']
+    end = form['end']
+    get_google_news(ticker, start, end)
+    return render_template("check_social_media.html", ticker=ticker, start=start, end=end)
 
 
 @main.route('/adj_close_histo_plot')

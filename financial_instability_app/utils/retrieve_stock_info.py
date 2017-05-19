@@ -190,7 +190,7 @@ def get_stock_from_yahoo(symbol, start, end):
     Returns pandas dataframe.
     """
     try:
-        df = web.DataReader(symbol, data_source='google', start=start, end=end)
+        df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
     except RemoteDataError:
         return None
 
