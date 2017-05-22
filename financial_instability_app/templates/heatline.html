@@ -23,7 +23,7 @@
             </tr>
             {% endfor %}
         </table>
-        <table class="corrTable">
+        <table class="corrTableEnd">
             <tr>
                 <th colspan="2">Positive Correlation</th>
             </tr>
@@ -34,18 +34,6 @@
             </tr>
             {% endfor %}
         </table>
-        <table class="corrTableEnd">
-            <tr>
-                <th colspan="2">No Correlation</th>
-            </tr>
-            {% for i in no_corr_df.index %}
-            <tr>
-                <td>{{ i }}</td>
-                <td>{{ no_corr_df[i] }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-
 
     </div>
     {{ generated_script | safe }}

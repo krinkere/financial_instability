@@ -60,6 +60,7 @@ def retrieve_sp500_tickers(pickle_jar_location="pickle_jar/", logit=True):
         tickers = []
         for row in table.findAll('tr')[1:]:
             ticker = row.findAll('td')[0].text
+            logger.info("-- Adding ticker [%s]" % ticker)
             tickers.append(ticker)
 
         tickers = sorted(tickers)
@@ -75,7 +76,7 @@ def get_stock_volume_data(ticker, start, end):
 
 
 def get_stock_volume_data_df_generator(ticker, start, end):
-    df = get_stock_from_yahoo(ticker, start, end)
+    df = get_stock_data(ticker, start, end)
     df = df_utils.slice_dataframe_by_columns(df, ['Volume_' + ticker])
     return df
 
@@ -99,7 +100,7 @@ def adj_close_data(ticker, start, end):
 
 
 def adj_close_plot_df_generator(ticker, start, end):
-    df = get_stock_from_yahoo(ticker, start, end)
+    df = get_stock_data(ticker, start, end)
     return df
 
 
@@ -184,13 +185,13 @@ def get_global_comparison_data_df_generator(ticker, start, end):
     return df
 
 
-def get_stock_from_yahoo(symbol, start, end):
+def get_stock_data(symbol, start, end):
     """
-    Downloads Stock from Yahoo Finance.
+    Downloads Stock from Google Finance.
     Returns pandas dataframe.
     """
     try:
-        df = web.DataReader(symbol, data_source='yahoo', start=start, end=end)
+        df = web.DataReader(symbol, data_source='google', start=start, end=end)
     except RemoteDataError:
         return None
 
@@ -214,7 +215,7 @@ def append_symbol_to_columns(df, symbol_name):
     """
     Utility method that takes data frame (df) and appends symbol_name at the end of its column names
     """
-    df.columns.values[-4] = 'AdjClose'
+    df.columns.values[-5] = 'AdjClose'
     df.columns = df.columns + '_' + symbol_name
     df['DailyReturn_%s' % symbol_name] = df['AdjClose_%s' % symbol_name].pct_change()
 
@@ -230,19 +231,30 @@ def get_stock_data_from_web(tickers, start, end, logit=True):
         logger.info("Received %r tickers" % len(tickers))
     bad_tickers = []
     for i, ticker in enumerate(tickers):
+        curr_df = get_stock_data(ticker, start, end)
         if logit:
             logger.info("Processing ticker '%s'" % ticker)
         else:
             print ("Processing ticker '%s'" % ticker)
-        curr_df = get_stock_from_yahoo(ticker, start, end)
         if i == 0:
-            df = get_stock_from_yahoo(ticker, start, end)
+            df = get_stock_data(ticker, start, end)
         else:
             if curr_df is not None:
-                df = df_utils.join_dataframes(curr_df, df)
+                if logit:
+                    logger.info(curr_df.head(1))
+                else:
+                    print (curr_df.head(1))
+                if curr_df.empty:
+                    if logit:
+                        logger.info("Data frame is empty")
+                    else:
+                        print ("Data frame is empty")
+                    bad_tickers.append(ticker)
+                else:
+                    df = df_utils.join_dataframes(curr_df, df)
             else:
                 if logit:
-                    logger.warn("Ticker %s could not be retrieved from Yahoo Finance" % ticker)
+                    logger.warn("Ticker %s could not be retrieved..." % ticker)
                 bad_tickers.append(ticker)
     if logit:
         logger.info("Could not process %r tickers. \n %r" % (len(bad_tickers), bad_tickers))
@@ -253,7 +265,7 @@ def get_stock_data_from_web(tickers, start, end, logit=True):
 
 def get_adj_close_data_from_web(ticker, start, end):
     logger.info("Processing ticker '%s'" % ticker)
-    df = get_stock_from_yahoo(ticker, start, end)
+    df = get_stock_data(ticker, start, end)
     df = df.ix[:, 'AdjClose_' + ticker]
     return df
 
@@ -267,10 +279,10 @@ def get_us_stock_data_from_web(ticker, start, end):
     # end = parser.parse(end_string)
 
     # Get US market data
-    sp500 = get_stock_from_yahoo('SPY', start, end)
+    sp500 = get_stock_data('SPY', start, end)
 
     # Get ticker data
-    stock = get_stock_from_yahoo(ticker, start, end)
+    stock = get_stock_data(ticker, start, end)
     df = df_utils.join_dataframes(stock, sp500)
 
     return df
@@ -285,17 +297,17 @@ def get_global_stock_data_from_web(ticker, start, end):
     # end = parser.parse(end_string)
 
     # Get major markets data
-    nasdaq = get_stock_from_yahoo('^IXIC', start, end)
-    frankfurt = get_stock_from_yahoo('^GDAXI', start, end)
+    nasdaq = get_stock_data('^IXIC', start, end)
+    frankfurt = get_stock_data('^GDAXI', start, end)
     # london = getStock('^FTSE', start, end)
-    paris = get_stock_from_yahoo('^FCHI', start, end)
-    hong_kong = get_stock_from_yahoo('^HSI', start, end)
-    japan = get_stock_from_yahoo('^N225', start, end)
-    australia = get_stock_from_yahoo('^AXJO', start, end)
-    sp500 = get_stock_from_yahoo('SPY', start, end)
+    paris = get_stock_data('^FCHI', start, end)
+    hong_kong = get_stock_data('^HSI', start, end)
+    japan = get_stock_data('^N225', start, end)
+    australia = get_stock_data('^AXJO', start, end)
+    sp500 = get_stock_data('SPY', start, end)
 
     # Get ticker data
-    stock = get_stock_from_yahoo(ticker, start, end)
+    stock = get_stock_data(ticker, start, end)
     df = df_utils.join_dataframes(stock, nasdaq)
     df = df_utils.join_dataframes(df, frankfurt)
     df = df_utils.join_dataframes(df, paris)

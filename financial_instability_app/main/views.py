@@ -167,6 +167,31 @@ def analysis_help():
     return render_template("analysis_help.html")
 
 
+@main.route('/corr_table', methods=['GET'])
+def corr_table():
+    heatmap_tickers = retrieve_stock_info.retrieve_sp500_tickers()
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+
+    df, valid_tickers = retrieve_stock_info.get_sp500_data(tickers=heatmap_tickers, start=start, end=end)
+
+    if ticker not in valid_tickers:
+        print "%s is not present. adding..." % ticker
+        df_ticker = retrieve_stock_info.get_adj_close_data(ticker=ticker, start=start, end=end)
+        df_ticker.rename(ticker, inplace=True)
+        df = df_utils.join_dataframes(df, df_ticker)
+
+    df_corr = stock_utils.generate_correlation_dataframe(df)
+    df_corr = df_corr.dropna()
+
+    # Remove ticker that is being analyzed
+    df_corr_results = df_corr[df_corr.index != ticker]
+    # Find negatively correlated tickers
+    df_corr_results = df_corr_results.sort_values(ticker, ascending=True)
+    neg_corr_df = df_corr_results[ticker]
+
+    return render_template("corr_table.html", ticker=ticker, neg_corr_df=neg_corr_df)
+
+
 @main.route('/heatline', methods=['GET'])
 def heatline():
     heatmap_tickers = retrieve_stock_info.retrieve_sp500_tickers()
@@ -198,31 +223,18 @@ def heatline():
     # Find positively correlated tickers
     df_corr_results = df_corr_results.sort_values(ticker, ascending=False)
     pos_corr_df = df_corr_results[ticker][:5]
-    no_corr_df_size = 0
-    no_corr_df_start = -0.005
-    no_corr_df_end = 0.005
-    while no_corr_df_size < 5:
-        # Find about 5 not correlated tickers
-        no_corr_range_df = df_corr_results[ticker].between(no_corr_df_start, no_corr_df_end, inclusive=False)
-        # Alternative way to get the range...
-        # mask = (sorted_by_ticker_df[ticker] > -0.005) & (sorted_by_ticker_df[ticker] < 0.005)
-        no_corr_df = df_corr_results[ticker].loc[no_corr_range_df]
-        no_corr_df_size = len(no_corr_df.index)
-        no_corr_df_start *= 2
-        no_corr_df_end *= 2
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_heatline(df_corr, valid_tickers, ticker)
 
     return render_template("heatline.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
-                           cdn_js=cdn_js, cdn_css=cdn_css, neg_corr_df=neg_corr_df, pos_corr_df=pos_corr_df,
-                           no_corr_df=no_corr_df)
+                           cdn_js=cdn_js, cdn_css=cdn_css, neg_corr_df=neg_corr_df, pos_corr_df=pos_corr_df)
 
 
 @main.route('/candle_plot', methods=['GET'])
 @utils.log_time("candle_plot")
 def candle_plot():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
-    df = retrieve_stock_info.get_stock_from_yahoo(ticker, start, end)
+    df = retrieve_stock_info.get_stock_data(ticker, start, end)
 
     generated_script, div_tag, cdn_js, cdn_css = visualization.generate_candlestick_plot(df, ticker)
 
