@@ -29,7 +29,7 @@ def index():
 
     form = TickerForm()
     if form.validate_on_submit():
-        # ticker_symbol = Ticker.query.filter_by(ticker_symbol=form.ticker_symbol.data)
+        ticker_symbol = Ticker.query.filter_by(ticker_symbol=form.ticker_symbol.data)
         if ticker_symbol is None:
             sector_name, industry_name = get_sector(form.ticker_symbol.data)
             if sector_name is None:
@@ -361,9 +361,11 @@ def check_social_media():
     form = request.form
     ticker = form['ticker_symbol']
     start = form['start']
+    start_date = datetime.datetime.strptime(start, '%d-%m-%Y')
     end = form['end']
+    end_date = datetime.datetime.strptime(end, '%d-%m-%Y')
     urls, titles, metas, abstracts = get_google_news(ticker, start, end)
-    return render_template("check_social_media.html", ticker=ticker, start=start, end=end, urls=urls, titles=titles,
+    return render_template("check_social_media.html", ticker=ticker, start=start_date.strftime('%B %d, %Y'), end=end_date.strftime('%B %d, %Y'), urls=urls, titles=titles,
                            metas=metas, abstracts=abstracts)
 
 

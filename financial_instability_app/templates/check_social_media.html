@@ -5,16 +5,15 @@
 
 {% block page_content %}
     <div class="page-header">
-        <h1>News for {{ ticker }} during [{{ start }} - {{ end }}] time period</h1>
+        <h1>{{ ticker }} news from {{ start }} until {{ end }}</h1>
     </div>
     {% set index = 0 %}
     {% for value in urls %}
         <div>
-            <a href="{{ value }}">{{ titles[index] }}</a>
+            <b><a target="_blank" href="{{ value }}">{{ titles[index] }}</a></b>
             <br>
-            {{ metas[index] }}
-            <br>
-            {{ abstracts[index] }}
+            <div style="color:#808080">{{ metas[index] }}</div>
+            <i>{{ abstracts[index] }}</i>
             <br><br>
         {% set index = index + 1 %}
         </div>
