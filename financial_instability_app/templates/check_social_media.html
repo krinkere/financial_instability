@@ -4,5 +4,19 @@
 {% block title %}Financial Instability{% endblock %}
 
 {% block page_content %}
-Info for {{ ticker }} during {{ start }} - {{ end }}
+    <div class="page-header">
+        <h1>News for {{ ticker }} during [{{ start }} - {{ end }}] time period</h1>
+    </div>
+    {% set index = 0 %}
+    {% for value in urls %}
+        <div>
+            <a href="{{ value }}">{{ titles[index] }}</a>
+            <br>
+            {{ metas[index] }}
+            <br>
+            {{ abstracts[index] }}
+            <br><br>
+        {% set index = index + 1 %}
+        </div>
+    {% endfor %}
 {% endblock %}

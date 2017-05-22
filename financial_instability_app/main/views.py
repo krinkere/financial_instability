@@ -29,7 +29,7 @@ def index():
 
     form = TickerForm()
     if form.validate_on_submit():
-        ticker_symbol = Ticker.query.filter_by(ticker_symbol=form.ticker_symbol.data).first()
+        # ticker_symbol = Ticker.query.filter_by(ticker_symbol=form.ticker_symbol.data)
         if ticker_symbol is None:
             sector_name, industry_name = get_sector(form.ticker_symbol.data)
             if sector_name is None:
@@ -319,23 +319,52 @@ def check_social_media():
     from lxml.html import parse
 
     def get_google_news(ticker, start, end):
-        # tree = parse(urlopen('http://www.google.com/finance?&q=NASDAQ%3A' + ticker))
-        tree = parse(urlopen('http://www.google.com/finance/company_news?q=NASDAQ%3A' + ticker + '&startdate=' + start
-                             + '&enddate=' + end + '&num=100'))
+        url = 'http://www.google.com/finance/company_news?q=NASDAQ%3A' + ticker + '&startdate=' + start + '&enddate=' + end + '&num=100'
+        tree = parse(urlopen(url))
+
+        print url
+
         try:
-            # Here I am going to assume that if we can't get sector, then it is invalid ticker
-            # sect = tree.xpath("//a[@id='sector']")[0].text, tree.xpath("//a[@id='sector']")[0].getnext().text
-            sect = tree.xpath("//div[@id='news-main']")
+            news = tree.xpath("//div[@id='news-main']//div/span/a")
+            urls = []
+            titles = []
+            for b in news:
+                # url
+                url = b.attrib['href']
+                urls.append(url)
+                # print(url)
+                # article title
+                title = b.text_content()
+                # print(title)
+                titles.append(title)
+
+            metas = []
+            news = tree.xpath("//div[@id='news-main']//div/div[@class='byline']")
+            for b in news:
+                # meta
+                meta = b.text_content()
+                # print(meta)
+                metas.append(meta)
+
+            abstracts = []
+            news = tree.xpath("//div[@id='news-main']//div/div[starts-with(@id,'Article')]/div")
+            for b in news:
+                # abstract
+                abstract = b.text_content()
+                # print(abstract)
+                abstracts.append(abstract)
+
         except IndexError:
-            sect = None, None
-        return sect
+            urls, titles, metas, abstracts = [], [], [], []
+        return urls, titles, metas, abstracts
 
     form = request.form
     ticker = form['ticker_symbol']
     start = form['start']
     end = form['end']
-    get_google_news(ticker, start, end)
-    return render_template("check_social_media.html", ticker=ticker, start=start, end=end)
+    urls, titles, metas, abstracts = get_google_news(ticker, start, end)
+    return render_template("check_social_media.html", ticker=ticker, start=start, end=end, urls=urls, titles=titles,
+                           metas=metas, abstracts=abstracts)
 
 
 @main.route('/adj_close_histo_plot')
