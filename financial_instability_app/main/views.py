@@ -319,44 +319,30 @@ def check_social_media():
     from lxml.html import parse
 
     def get_google_news(ticker, start, end):
-        url = 'http://www.google.com/finance/company_news?q=NASDAQ%3A' + ticker + '&startdate=' + start + '&enddate=' + end + '&num=100'
-        tree = parse(urlopen(url))
+        google_news_feed_url = 'http://www.google.com/finance/company_news?q=NASDAQ%3A' + ticker + '&startdate=' + start + '&enddate=' + end + '&num=100'
+        tree = parse(urlopen(google_news_feed_url))
 
-        print url
+        print google_news_feed_url
 
         try:
-            news = tree.xpath("//div[@id='news-main']//div/span/a")
-            urls = []
-            titles = []
-            for b in news:
-                # url
-                url = b.attrib['href']
-                urls.append(url)
-                # print(url)
-                # article title
-                title = b.text_content()
-                # print(title)
-                titles.append(title)
+            news_feed = []
+            google_news_feed = tree.xpath("//div[@id='news-main']//div[@class='g-section news sfe-break-bottom-16']")
+            for news in google_news_feed:
+                url = news.xpath('.//span[@class="name"]/a/@href')[0]
+                title = news.xpath('.//span[@class="name"]/a/text()')[0]
 
-            metas = []
-            news = tree.xpath("//div[@id='news-main']//div/div[@class='byline']")
-            for b in news:
-                # meta
-                meta = b.text_content()
-                # print(meta)
-                metas.append(meta)
+                meta_source = news.xpath('.//div[@class="byline"]/span[@class="src"]/text()')[0]
+                meta_date = news.xpath('.//div[@class="byline"]/span[@class="date"]/text()')[0]
 
-            abstracts = []
-            news = tree.xpath("//div[@id='news-main']//div/div[starts-with(@id,'Article')]/div")
-            for b in news:
-                # abstract
-                abstract = b.text_content()
-                # print(abstract)
-                abstracts.append(abstract)
+                abstract = news.xpath('.//div[@class="g-c"]/div[1]/text()')
+                if not abstract:
+                    abstract = ''
+
+                news_feed.append((url, title, meta_source, meta_date, abstract))
 
         except IndexError:
-            urls, titles, metas, abstracts = [], [], [], []
-        return urls, titles, metas, abstracts
+            news_feed = []
+        return news_feed
 
     form = request.form
     ticker = form['ticker_symbol']
@@ -364,9 +350,9 @@ def check_social_media():
     start_date = datetime.datetime.strptime(start, '%d-%m-%Y')
     end = form['end']
     end_date = datetime.datetime.strptime(end, '%d-%m-%Y')
-    urls, titles, metas, abstracts = get_google_news(ticker, start, end)
-    return render_template("check_social_media.html", ticker=ticker, start=start_date.strftime('%B %d, %Y'), end=end_date.strftime('%B %d, %Y'), urls=urls, titles=titles,
-                           metas=metas, abstracts=abstracts)
+    news_feed = get_google_news(ticker, start, end)
+    return render_template("check_social_media.html", ticker=ticker, start=start_date.strftime('%B %d, %Y'),
+                           end=end_date.strftime('%B %d, %Y'), news_feed=news_feed)
 
 
 @main.route('/adj_close_histo_plot')

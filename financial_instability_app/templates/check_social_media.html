@@ -7,15 +7,13 @@
     <div class="page-header">
         <h1>{{ ticker }} news from {{ start }} until {{ end }}</h1>
     </div>
-    {% set index = 0 %}
-    {% for value in urls %}
+    {% for one_url, one_text, two_meta_source, two_meta_date, three_abstract in news_feed %}
         <div>
-            <b><a target="_blank" href="{{ value }}">{{ titles[index] }}</a></b>
+            <b><a target="_blank" href="{{ one_url }}">{{ one_text }}</a></b>
             <br>
-            <div style="color:#808080">{{ metas[index] }}</div>
-            <i>{{ abstracts[index] }}</i>
+            <div style="color:#808080">{{ two_meta_source }} - {{ two_meta_date }}</div>
+            <i>{{ three_abstract }}</i>
             <br><br>
-        {% set index = index + 1 %}
         </div>
     {% endfor %}
 {% endblock %}
