@@ -335,7 +335,9 @@ def check_social_media():
                 meta_date = news.xpath('.//div[@class="byline"]/span[@class="date"]/text()')[0]
 
                 abstract = news.xpath('.//div[@class="g-c"]/div[1]/text()')
-                if not abstract:
+                if abstract:
+                    abstract = abstract[0]
+                else:
                     abstract = ''
 
                 news_feed.append((url, title, meta_source, meta_date, abstract))
