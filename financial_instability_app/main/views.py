@@ -349,9 +349,14 @@ def check_social_media():
     form = request.form
     ticker = form['ticker_symbol']
     start = form['start']
-    start_date = datetime.datetime.strptime(start, '%d-%m-%Y')
     end = form['end']
-    end_date = datetime.datetime.strptime(end, '%d-%m-%Y')
+    try:
+        start_date = datetime.datetime.strptime(start, '%d-%m-%Y')
+        end_date = datetime.datetime.strptime(end, '%d-%m-%Y')
+    except ValueError:
+        start_date = datetime.datetime.strptime(start, '%Y-%m-%d %X')
+        end_date = datetime.datetime.strptime(end, '%Y-%m-%d %X')
+
     news_feed = get_google_news(ticker, start, end)
     return render_template("check_social_media.html", ticker=ticker, start=start_date.strftime('%B %d, %Y'),
                            end=end_date.strftime('%B %d, %Y'), news_feed=news_feed)

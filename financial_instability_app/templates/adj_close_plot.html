@@ -12,16 +12,19 @@
     {{ generated_script | safe }}
     {{ div_tag | safe }}
 
+    <br>
     <form action="check_social_media" method="post" name="check_social_media">
+
       {{ form.hidden_tag() }}
+      <div class="buttonHolder"><input type="submit" value="Check Social Media"></div>
       <p>
-          Stock Name:<br>
-          {{ form.ticker_symbol(size=80, value=ticker) }}<br>
-          Start Date:<br>
-          {{ form.start(size=80, value=start) }}<br>
-          End Date:<br>
-          {{ form.end(size=80, value=end) }}<br>
+{#          Stock Name:<br>#}
+          {{ form.ticker_symbol(size=80, value=ticker, type="hidden") }}<br>
+{#          Start Date:<br>#}
+          {{ form.start(size=80, value=start, type="hidden") }}<br>
+{#          End Date:<br>#}
+          {{ form.end(size=80, value=end, type="hidden") }}<br>
       </p>
-      <p><input type="submit" value="Check Social Media"></p>
+
   </form>
 {% endblock %}

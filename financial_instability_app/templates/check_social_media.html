@@ -16,4 +16,7 @@
             <br><br>
         </div>
     {% endfor %}
+    {% if news_feed|length == 0 %}
+        Unfortunately, no news were found...
+    {% endif %}
 {% endblock %}
