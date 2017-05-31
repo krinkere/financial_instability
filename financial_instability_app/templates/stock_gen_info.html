@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Financial Instability{% endblock %}
+
+{% block page_content %}
+    <div class="page-header">
+        <h1>Information for <a class="redtext">{{ ticker }}</a></h1>
+    </div>
+    <div>
+
+        <table class="regTable">
+            <tr>
+                <th>
+                    <div class="helptooltip">Name
+                    </div>
+                </td>
+                <td>{{ share.get_name() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Stock Exchange
+                    </div>
+                </td>
+                <td>{{ share.get_stock_exchange() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Price Earnings Growth (PEG) Ratio
+                        <span class="helptooltiptext">The PEG ratio (price/earnings to growth ratio) is a valuation metric for determining the relative trade-off between the price of a stock, the earnings generated per share (EPS), and the company's expected growth.</span>
+                    </div>
+                </td>
+                <td>{{ share.get_price_earnings_growth_ratio() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Prev Close
+                    </div>
+                </td>
+                <td>{{ share.get_prev_close() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Open
+                    </div>
+                </td>
+                <td>{{ share.get_open() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Price
+                    </div>
+                </td>
+                <td>{{ share.get_price() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Days High
+                    </div>
+                </td>
+                <td>{{ share.get_days_high() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Days Low
+                    </div>
+                </td>
+                <td>{{ share.get_days_low() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Year High
+                    </div>
+                </td>
+                <td>{{ share.get_year_high() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Year Low
+                    </div>
+                </td>
+                <td>{{ share.get_year_low() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Change
+                    </div>
+                </td>
+                <td>{{ share.get_change() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Percent Change
+                    </div>
+                </td>
+                <td>{{ share.get_percent_change() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Volume
+                    </div>
+                </td>
+                <td>{{ share.get_volume() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Avg Daily Volume
+                    </div>
+                </td>
+                <td>{{ share.get_avg_daily_volume() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Market Cap
+                        <span class="helptooltiptext">Market capitalization (market cap) is the market value at a point in time of the shares outstanding of a publicly traded company, being equal to the share price at that point of time times the number of shares outstanding.</span>
+                    </div>
+                </td>
+                <td>{{ share.get_market_cap() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Book Value
+                        <span class="helptooltiptext">Book value of an asset is the value at which the asset is carried on a balance sheet and calculated by taking the cost of an asset minus the accumulated depreciation.</span>
+                    </div>
+                </td>
+                <td>{{ share.get_book_value() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Earning Share
+                        <span class="helptooltiptext">Earnings per share (EPS) is the portion of a company's profit allocated to each outstanding share of common stock. Earnings per share serves as an indicator of a company's profitability.</span>
+                    </div>
+                </td>
+                <td>{{ share.get_earnings_share() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">50 day moving avg
+                    </div>
+                </td>
+                <td>{{ share.get_50day_moving_avg() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">200 day moving avg
+                    </div>
+                </td>
+                <td>{{ share.get_200day_moving_avg() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Price Sales
+                        <span class="helptooltiptext">A ratio that compares a company’s stock price to its revenues. The price-to-sales ratio is an indicator of the value placed on each dollar of a company’s sales or revenues.</span>
+                    </div>
+                </td>
+                <td>{{ share.get_price_sales() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Price Book
+                        <span class="helptooltiptext">The price-to-book ratio (P/B Ratio) is a ratio used to compare a stock's market value to its book value. It is calculated by dividing the current closing price of the stock by the latest quarter's book value per share.</span>
+                    </div>
+                </td>
+                <td>{{ share.get_price_book() }}</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="helptooltip">Short Ratio
+                        <span class="helptooltiptext">The ratio of tradable shares being shorted to shares in the market, or the float. It is an indirect metric of investor sentiment. When short interest is high, above 40%, it implies company investors hope shares will decline in value.</span>
+                    </div>
+                </td>
+                <td>{{ share.get_short_ratio() }}</td>
+            </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+        </table>
+
+    </div>
+{% endblock %}

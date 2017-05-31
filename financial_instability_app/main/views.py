@@ -167,6 +167,16 @@ def analysis_help():
     return render_template("analysis_help.html")
 
 
+@main.route('/stock_gen_info')
+def stock_gen_info():
+    from yahoo_finance import Share
+
+    ticker = utils.get_ticker(session)
+    share = Share(ticker)
+
+    return render_template("stock_gen_info.html", ticker=ticker, share=share)
+
+
 @main.route('/corr_table', methods=['GET'])
 def corr_table():
     heatmap_tickers = retrieve_stock_info.retrieve_sp500_tickers()

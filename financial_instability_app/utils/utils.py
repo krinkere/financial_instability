@@ -27,10 +27,16 @@ def log_time(function_name):
 
 # Date time
 def get_ticker_start_date_end_date(session):
-    ticker = session.get("ticker_symbol")
+    ticker = get_ticker(session)
     start, end = get_start_date_end_date(session)
 
     return ticker, start, end
+
+
+def get_ticker(session):
+    ticker = session.get("ticker_symbol")
+
+    return ticker
 
 
 def get_start_date_end_date(session):

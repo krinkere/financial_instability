@@ -92,3 +92,51 @@
 .buttonHolder{
     text-align: center;
 }
+
+.helptooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.helptooltip .helptooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: -5px;
+    right: 105%;
+}
+
+.helptooltip:hover .helptooltiptext {
+    visibility: visible;
+}
+.regTable {
+    border: 2px solid;
+    float: left;
+    margin-right: 20px;
+}
+
+.regTable th{
+    border: 1px solid;
+    text-align: right;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: lightgray;
+}
+
+.regTable tr{
+    border: 1px solid;
+}
+
+.regTable td{
+    border: 1px solid;
+    padding-left: 10px;
+    padding-right: 10px;
+}
