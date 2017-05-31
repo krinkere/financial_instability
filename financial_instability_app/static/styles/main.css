@@ -100,7 +100,7 @@
 
 .helptooltip .helptooltiptext {
     visibility: hidden;
-    width: 120px;
+    width: 700px;
     background-color: black;
     color: #fff;
     text-align: center;
@@ -111,7 +111,7 @@
     position: absolute;
     z-index: 1;
     top: -5px;
-    right: 105%;
+    left: 105%;
 }
 
 .helptooltip:hover .helptooltiptext {
