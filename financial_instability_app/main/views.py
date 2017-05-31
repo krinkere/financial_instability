@@ -323,6 +323,52 @@ def adj_close_plot():
                            cdn_js=cdn_js, cdn_css=cdn_css, form=form, start=start, end=end)
 
 
+@main.route('/swing_index_plot')
+def swing_index_plot():
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_full_stock_data(ticker, start, end)
+
+    print df.head()
+
+    current_values = df[1:].values
+    print current_values
+    prior_values = df[:-1].values
+    print prior_values
+
+    dates = []
+    swing_indexes = []
+
+    for counter, values in enumerate(current_values):
+        date = df.index[counter+1]
+        dates.append(date)
+        open_prior = prior_values[counter][0]
+        # print open_prior
+        open_current = values[0]
+        # print open_current
+        high_current = values[1]
+        # print high_current
+        low_current = values[2]
+        # print low_current
+        close_prior = prior_values[counter][3]
+        # print close_prior
+        close_current = values[3]
+        # print close_current
+
+        swing_index = stock_utils.calculate_swing_index(open_prior, open_current, high_current, low_current,
+                                                        close_prior, close_current, 75)
+
+        swing_indexes.append(swing_index)
+
+    import pandas as pd
+
+    swing_index_df = pd.DataFrame(swing_indexes, index=dates, columns=['Swing Index'])
+
+    print swing_index_df.head()
+
+    return render_template("swing_index_plot.html")
+
+
+
 @main.route('/check_social_media', methods=['GET', 'POST'])
 def check_social_media():
     from urllib import urlopen

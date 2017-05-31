@@ -185,6 +185,19 @@ def get_global_comparison_data_df_generator(ticker, start, end):
     return df
 
 
+def get_full_stock_data(symbol, start, end):
+    """
+    Downloads Stock from Google Finance.
+    Returns pandas dataframe.
+    """
+    try:
+        df = web.DataReader(symbol, data_source='google', start=start, end=end)
+    except RemoteDataError:
+        return None
+
+    return df
+
+
 def get_stock_data(symbol, start, end):
     """
     Downloads Stock from Google Finance.

@@ -101,3 +101,66 @@ def calculate_adj_numbers(df, ticker):
     df['AdjLow_' + ticker] = adj_rate * df['Low']
 
     return df
+
+
+def simple_moving_average(values, window):
+    weights = np.repeat(1.0, window)/window
+    smas = np.convolve(values, weights, 'valid')
+    return smas
+
+
+def exponential_average(values, window):
+    weights = np.exp(np.linspace(-1., 0., window))
+    weights /= weights.sum()
+
+    a = np.convolve(values, weights)[:len(values)]
+    a[:window]=a[window]
+    return a
+
+
+def calculate_swing_index(open_prior, open_current, high_current, low_current, close_prior, close_current, limit_move):
+    """
+    The Swing Index is a technical indicator that attempts to predict future short-term price action:
+
+    When the Swing Index crosses over zero, then a trader might expect short-term price movement upward.
+    When the Swing Index crosses below zero, then a trader might expect short-term price movement downward.
+
+    50 * ((CY - C + 0.5 * (CY - OY) + 0.25 * (C- O)) / R) * (K / T)
+
+    """
+
+    def calc_R(H2, C1, L2, O1):
+        x = H2 - C1
+        y = L2 - C1
+        z = H2 - L2
+
+        # print x
+        # print y
+        # print z
+
+        if z < x > y:
+            R = (H2 - C1) - (.5 * (L2 - C1)) + (.25 * (C1 - O1))
+        elif x < y > z:
+            R = (L2 - C1) - (.5 * (H2 - C1)) + (.25 * (C1 - O1))
+        else:
+            R = (H2 - L2) + (.25 * (C1 - O1))
+
+        return R
+
+    def calc_K(H2, L2, C1):
+        x = H2 - C1
+        y = L2 - C1
+
+        if x > y:
+            return x
+        else:
+            return y
+    # $75 for gold, c50 for silver
+    L = limit_move
+    R = calc_R(high_current, close_prior, low_current, open_prior)
+    K = calc_K(high_current, low_current, close_prior)
+
+    swing_index = 50 * ((close_current - close_prior + (.5 * (close_current - open_current)) +
+                         (.25 * (close_prior - open_prior))) / R) * (K / L)
+
+    return swing_index
