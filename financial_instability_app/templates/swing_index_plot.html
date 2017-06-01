@@ -5,22 +5,39 @@
 
 {% block page_content %}
 
-    <link rel="stylesheet" href={{ cdn_css }} type="text/css" />
-    <script type="text/javascript" src={{ cdn_js }}></script>
-    <div class="page-header">
-        <h1>Swing Index</h1>
-    </div>
-        <p>The Swing Index is a technical indicator that attempts to predict future short-term price action:</p>
-        <ul>
-            <li>When the Swing Index crosses over zero, then a trader might expect short-term price movement upward.</li>
-            <li>When the Swing Index crosses below zero, then a trader might expect short-term price movement downward.</li>
-        </ul>
-        <p>A few of the many potential buy and sell signals are shown below in the chart of the E-mini Russell 2000 Futures contract:</p>
-        <div style="width: 50%; margin: 0 auto;">
-            <img src="{{ url_for('static', filename='images/SwingIndexER2.gif') }}" alt="Swing Index potential buy and sell signals" />
-        </div>
-    <h1><a class="redtext">{{ ticker }}</a></h1>
-    {{ generated_script | safe }}
-    {{ div_tag | safe }}
+    <link rel="stylesheet" href={{ si_cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ si_cdn_js }}></script>
+    <link rel="stylesheet" href={{ asi_cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ asi_cdn_js }}></script>
 
+    <h3>Swing Index</h3>
+    <p>The Swing Index is a technical indicator that attempts to predict future short-term price action:</p>
+    <ul>
+        <li>When the Swing Index crosses over zero, then a trader might expect short-term price movement upward.</li>
+        <li>When the Swing Index crosses below zero, then a trader might expect short-term price movement downward.</li>
+    </ul>
+    <p>A few of the many potential buy and sell signals are shown below in the chart of the E-mini Russell 2000 Futures contract:</p>
+    <div style="width: 50%; margin: 0 auto;">
+        <img src="{{ url_for('static', filename='images/SwingIndexER2.gif') }}" alt="Swing Index potential buy and sell signals" />
+    </div>
+    <br>
+    <p>As can be noted from the chart above, numerous potential buy and sell signals are given. The Swing Index advertises itself as a tool for very short-term trading.</p>
+
+    <h3>Accumulative Swing Index</h3>
+    <p>the Accumulative Swing Index (ASI) is mainly used as a divergence and confirmation tool, but can be used for buy and sell signals as well.</p>
+    <div style="width: 50%; margin: 0 auto;">
+        <img src="{{ url_for('static', filename='images/AccumSwingIndex.gif') }}" alt="Accumulated Swing Index potential buy and sell signals" />
+    </div>
+    <ul>
+        <li>Potential Buy  Signal - A trader might consider a buy signal when the Accumulative Swing Index breaks above a downward trendline.</li>
+        <li>Potential Sell Signal - A trader might consider a sell signal when the Accumulative Swing Index breaks below an upward trendline</li>
+    </ul>
+
+
+    <h3 class="redtext">{{ ticker }} Swing Index</h3>
+    {{ si_generated_script | safe }}
+    {{ si_div_tag | safe }}
+    <h3 class="redtext">{{ ticker }} Accumulative Swing Index</h3>
+    {{ asi_generated_script | safe }}
+    {{ asi_div_tag | safe }}
 {% endblock %}

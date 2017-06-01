@@ -330,10 +330,16 @@ def swing_index_plot():
 
     swing_index_df = stock_utils.generate_swing_index_timeserie(df)
 
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_swing_index_plot(swing_index_df)
+    si_generated_script, si_div_tag, si_cdn_js, si_cdn_css = \
+        visualization.generate_swing_index_plot(swing_index_df, 'Swing Index', gen_vertical_line=True)
 
-    return render_template("swing_index_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
-                           cdn_js=cdn_js, cdn_css=cdn_css, start=start, end=end)
+    asi_generated_script, asi_div_tag, asi_cdn_js, asi_cdn_css = \
+        visualization.generate_swing_index_plot(swing_index_df, 'Accumulated Swing Index', gen_vertical_line=False)
+
+    return render_template("swing_index_plot.html", ticker=ticker, si_generated_script=si_generated_script,
+                           si_div_tag=si_div_tag, si_cdn_js=si_cdn_js, si_cdn_css=si_cdn_css,
+                           asi_generated_script=asi_generated_script, asi_div_tag=asi_div_tag, asi_cdn_js=asi_cdn_js,
+                           asi_cdn_css=asi_cdn_css)
 
 
 @main.route('/check_social_media', methods=['GET', 'POST'])

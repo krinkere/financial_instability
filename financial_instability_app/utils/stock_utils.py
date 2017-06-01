@@ -144,6 +144,8 @@ def generate_swing_index_timeserie(df):
 
     swing_index_df = pd.DataFrame(swing_indexes, index=dates, columns=['Swing Index'])
 
+    swing_index_df['Accumulated Swing Index'] = swing_index_df['Swing Index'].cumsum()
+
     return swing_index_df
 
 
