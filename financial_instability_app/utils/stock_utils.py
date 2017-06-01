@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 def normalize_data(df):
@@ -116,6 +117,34 @@ def exponential_average(values, window):
     a = np.convolve(values, weights)[:len(values)]
     a[:window]=a[window]
     return a
+
+
+def generate_swing_index_timeserie(df):
+    current_values = df[1:].values
+    prior_values = df[:-1].values
+
+    dates = []
+    swing_indexes = []
+
+    for counter, values in enumerate(current_values):
+        date = df.index[counter + 1]
+        dates.append(date)
+
+        open_prior = prior_values[counter][0]
+        open_current = values[0]
+        high_current = values[1]
+        low_current = values[2]
+        close_prior = prior_values[counter][3]
+        close_current = values[3]
+
+        swing_index = calculate_swing_index(open_prior, open_current, high_current, low_current, close_prior,
+                                            close_current, 75)
+
+        swing_indexes.append(swing_index)
+
+    swing_index_df = pd.DataFrame(swing_indexes, index=dates, columns=['Swing Index'])
+
+    return swing_index_df
 
 
 def calculate_swing_index(open_prior, open_current, high_current, low_current, close_prior, close_current, limit_move):
