@@ -5,6 +5,22 @@
 
 {% block page_content %}
 
-    Place holder....
+    <link rel="stylesheet" href={{ cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ cdn_js }}></script>
+    <div class="page-header">
+        <h1>Swing Index</h1>
+    </div>
+        <p>The Swing Index is a technical indicator that attempts to predict future short-term price action:</p>
+        <ul>
+            <li>When the Swing Index crosses over zero, then a trader might expect short-term price movement upward.</li>
+            <li>When the Swing Index crosses below zero, then a trader might expect short-term price movement downward.</li>
+        </ul>
+        <p>A few of the many potential buy and sell signals are shown below in the chart of the E-mini Russell 2000 Futures contract:</p>
+        <div style="width: 50%; margin: 0 auto;">
+            <img src="{{ url_for('static', filename='images/SwingIndexER2.gif') }}" alt="Swing Index potential buy and sell signals" />
+        </div>
+    <h1><a class="redtext">{{ ticker }}</a></h1>
+    {{ generated_script | safe }}
+    {{ div_tag | safe }}
 
 {% endblock %}

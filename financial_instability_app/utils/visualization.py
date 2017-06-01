@@ -159,6 +159,22 @@ def generate_single_line_plot(df, column):
     return generated_script, div_tag, cdn_js, cdn_css
 
 
+def generate_swing_index_plot(df):
+    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
+    p.grid.grid_line_alpha = 0.3
+    p.line(df.index, df['Swing Index'], line_width=2)
+
+    zero_line = Span(location=0, dimension='width', line_color='red', line_width=3)
+
+    p.renderers.extend([zero_line])
+
+    generated_script, div_tag = components(p)
+    cdn_js = CDN.js_files[0]
+    cdn_css = CDN.css_files[0]
+
+    return generated_script, div_tag, cdn_js, cdn_css
+
+
 def generate_multi_line_plot(df, tickers, labels):
     area_colors = get_colors(len(tickers))
     p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)

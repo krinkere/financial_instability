@@ -365,7 +365,10 @@ def swing_index_plot():
 
     print swing_index_df.head()
 
-    return render_template("swing_index_plot.html")
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_swing_index_plot(swing_index_df)
+
+    return render_template("swing_index_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css, start=start, end=end)
 
 
 
