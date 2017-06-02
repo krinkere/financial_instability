@@ -323,6 +323,16 @@ def adj_close_plot():
                            cdn_js=cdn_js, cdn_css=cdn_css, form=form, start=start, end=end)
 
 
+@main.route('/atr')
+def atr_plot():
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_full_stock_data(ticker, start, end)
+
+    df = stock_utils.calculate_average_true_range(df)
+
+    return render_template("placeholder.html")
+
+
 @main.route('/swing_index_plot')
 def swing_index_plot():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)

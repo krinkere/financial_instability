@@ -104,21 +104,6 @@ def calculate_adj_numbers(df, ticker):
     return df
 
 
-def simple_moving_average(values, window):
-    weights = np.repeat(1.0, window)/window
-    smas = np.convolve(values, weights, 'valid')
-    return smas
-
-
-def exponential_average(values, window):
-    weights = np.exp(np.linspace(-1., 0., window))
-    weights /= weights.sum()
-
-    a = np.convolve(values, weights)[:len(values)]
-    a[:window]=a[window]
-    return a
-
-
 def generate_swing_index_timeserie(df):
     current_values = df[1:].values
     prior_values = df[:-1].values
@@ -195,3 +180,55 @@ def calculate_swing_index(open_prior, open_current, high_current, low_current, c
                          (.25 * (close_prior - open_prior))) / R) * (K / L)
 
     return swing_index
+
+
+def calculate_true_range(high_current, low_currnet, close_prior):
+    x = high_current - low_currnet
+    y = abs(high_current - close_prior)
+    z = abs(low_currnet - close_prior)
+
+    if y <= x >= z:
+        TR = x
+    elif x <= y >= z:
+        TR = y
+    elif x <= z >= y:
+        TR = z
+
+    return TR
+
+
+def calculate_average_true_range(df):
+    df['ATR1'] = abs(df['High'] - df['Low'])
+    df['ATR2'] = abs(df['High'] - df['Close'].shift())
+    df['ATR3'] = abs(df['Low'] - df['Close'].shift())
+    df['TrueRange'] = df[['ATR1', 'ATR2', 'ATR3']].max(axis=1)
+    df['AvgTrueRange'] = pd.ewma(df['TrueRange'], span=14)
+    return df
+
+# How not to calculate it :)
+# def calculate_average_true_range(df):
+#     current_values = df[1:].values
+#     prior_values = df[:-1].values
+#
+#     dates = []
+#     true_ranges = []
+#
+#     for counter, values in enumerate(current_values):
+#         date = df.index[counter + 1]
+#         dates.append(date)
+#
+#         high_current = values[1]
+#         low_current = values[2]
+#         close_prior = prior_values[counter][3]
+#
+#         true_range = calculate_true_range(high_current, low_current, close_prior)
+#
+#         true_ranges.append(true_range)
+#
+#     true_range_df = pd.DataFrame(true_ranges, index=dates, columns=['True Range'])
+#
+#     true_range_df['Average True Range'] = pd.ewma(true_range_df['True Range'], span=14)
+#
+#     return true_range_df
+
+
