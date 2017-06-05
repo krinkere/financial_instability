@@ -330,7 +330,16 @@ def atr_plot():
 
     df = stock_utils.calculate_average_true_range(df)
 
-    return render_template("placeholder.html")
+    tr_generated_script, tr_div_tag, tr_cdn_js, tr_cdn_css = \
+        visualization.generate_true_range_plot(df, 'TrueRange')
+
+    atr_generated_script, atr_div_tag, atr_cdn_js, atr_cdn_css = \
+        visualization.generate_true_range_plot(df, 'AvgTrueRange')
+
+    return render_template("atr.html", ticker=ticker, tr_generated_script=tr_generated_script,
+                           tr_div_tag=tr_div_tag, tr_cdn_js=tr_cdn_js, tr_cdn_css=tr_cdn_css,
+                           atr_generated_script=atr_generated_script, atr_div_tag=atr_div_tag, atr_cdn_js=atr_cdn_js,
+                           atr_cdn_css=atr_cdn_css)
 
 
 @main.route('/swing_index_plot')

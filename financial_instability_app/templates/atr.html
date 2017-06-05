@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Financial Instability{% endblock %}
+
+{% block page_content %}
+
+    <link rel="stylesheet" href={{ tr_cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ tr_cdn_js }}></script>
+    <link rel="stylesheet" href={{ atr_cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ atr_cdn_js }}></script>
+    <div class="page-header">
+        <h1>True Range and Average True Range</h1>
+    </div>
+    <p>
+    J. Welles Wilder introduced the world to the indicators known as true range and average true range as measures of
+    volatility.
+    </p>
+
+    <h4>What is the True Range?</h4>
+    <p>A stock's range is the difference between the high and low price on any given day. It reveals information about how
+    volatile a stock is. Large ranges indicate high volatility and small ranges indicate low volatility.</p>
+
+    <h4>What is the Average True Range?</h4>
+    <p>The average true range (ATR) is an exponential moving average of the true range. Wilder used a 14-day ATR to explain
+    the concept.
+    </p>
+
+
+
+
+    <h3 class="redtext">{{ ticker }} True Range</h3>
+    {{ tr_generated_script | safe }}
+    {{ tr_div_tag | safe }}
+    <h3 class="redtext">{{ ticker }} Average True Range</h3>
+    {{ atr_generated_script | safe }}
+    {{ atr_div_tag | safe }}
+{% endblock %}
