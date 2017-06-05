@@ -182,19 +182,30 @@ def calculate_swing_index(open_prior, open_current, high_current, low_current, c
     return swing_index
 
 
-def calculate_true_range(high_current, low_currnet, close_prior):
-    x = high_current - low_currnet
-    y = abs(high_current - close_prior)
-    z = abs(low_currnet - close_prior)
+def calculate_direction_move(df):
+    df['MoveUp'] = df['High'] - df['High'].shift()
+    df['MoveDown'] = df['Low'].shift() - df['Low']
 
-    if y <= x >= z:
-        TR = x
-    elif x <= y >= z:
-        TR = y
-    elif x <= z >= y:
-        TR = z
+    df['PDM'] = 0
+    df['PDM'][(df['MoveUp'] > 0) & (df['MoveUp'] > df['MoveDown'])] = df['MoveUp']
 
-    return TR
+    df['NDM'] = 0
+    df['NDM'][(df['MoveDown'] > 0) & (df['MoveDown'] > df['MoveUp'])] = df['MoveDown']
+
+    return df
+
+
+def calculate_direction_index(df):
+    df['PDI'] = (pd.ewma(df['PDM'], span=14) / df['AvgTrueRange']) * 100
+    df['NDI'] = (pd.ewma(df['NDM'], span=14) / df['AvgTrueRange']) * 100
+
+    return df
+
+
+def calculate_average_directional_index(df):
+    df['ADX'] = (pd.ewma(abs(df['PDI']-df['NDI']), span=14) / (df['PDI']+df['NDI'])) * 100
+
+    return df
 
 
 def calculate_average_true_range(df):

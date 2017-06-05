@@ -323,6 +323,22 @@ def adj_close_plot():
                            cdn_js=cdn_js, cdn_css=cdn_css, form=form, start=start, end=end)
 
 
+@main.route('/adi')
+def adi_plot():
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_full_stock_data(ticker, start, end)
+
+    df = stock_utils.calculate_average_true_range(df)
+    df = stock_utils.calculate_direction_move(df)
+    df = stock_utils.calculate_direction_index(df)
+    df = stock_utils.calculate_average_directional_index(df)
+
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_average_directional_index_plot(df)
+
+    return render_template("adx.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css)
+
+
 @main.route('/atr')
 def atr_plot():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
