@@ -1,9 +1,9 @@
 from bokeh.plotting import figure
-from bokeh.io import vplot
 from bokeh.embed import components
 from bokeh.resources import CDN
 from bokeh.charts import Histogram, Bar
 from bokeh.models import Span
+from bokeh.models.layouts import Column
 import matplotlib.pyplot as plt
 import stock_utils
 from colorsys import hsv_to_rgb
@@ -12,6 +12,8 @@ from bokeh.models import LinearColorMapper, ColumnDataSource, HoverTool
 from math import pi
 from progressbar import ProgressBar
 import time
+from bokeh.models import CustomJS
+from bokeh.models import CheckboxGroup
 
 
 def generate_candlestick_plot(df, ticker):
@@ -124,8 +126,6 @@ def generate_comperative_plot_line_plot(df, column, ticker, comparison_df):
 
 
 def generate_single_line_plot(df, column):
-    from bokeh.models import CustomJS
-
     TOOLS = "pan,wheel_zoom,box_zoom,reset,box_select,save"
     p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True, tools=TOOLS)
     p.grid.grid_line_alpha = 0.3
@@ -188,18 +188,33 @@ def generate_swing_index_plot(df, column_name, gen_vertical_line=True):
 
 
 def generate_average_directional_index_plot(df):
+
+    from bokeh.layouts import row
+
     p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
     p.grid.grid_line_alpha = 0.3
 
-    p.line(df.index, df['ADX'], line_width=2, legend='ADX', color='blue')
-    p.line(df.index, df['PDI'], line_width=2, legend='PDI', color='green')
-    p.line(df.index, df['NDI'], line_width=2, legend='NDI', color='red')
+    l0 = p.line(df.index, df['ADX'], line_width=2, legend='ADX', color='blue')
+    l1 = p.line(df.index, df['PDI'], line_width=2, legend='PDI', color='green')
+    l2 = p.line(df.index, df['NDI'], line_width=2, legend='NDI', color='red')
 
-    generated_script, div_tag = components(p)
+    checkbox = CheckboxGroup(labels=["ADX", "PDI", "NDI"],
+                             active=[0, 1, 2], width=100)
+    checkbox.callback = CustomJS.from_coffeescript(args=dict(l0=l0, l1=l1, l2=l2, checkbox=checkbox), code="""
+        l0.visible = 0 in checkbox.active;
+        l1.visible = 1 in checkbox.active;
+        l2.visible = 2 in checkbox.active;
+        """)
+
+    layout = row(checkbox, p)
+
+    generated_script, div_tag = components(layout)
     cdn_js = CDN.js_files[0]
+    cdn_js_widgets = CDN.js_files[1]
     cdn_css = CDN.css_files[0]
+    cdn_css_widgets = CDN.css_files[1]
 
-    return generated_script, div_tag, cdn_js, cdn_css
+    return generated_script, div_tag, cdn_js, cdn_js_widgets, cdn_css, cdn_css_widgets
 
 
 def generate_multi_line_plot(df, tickers, labels):
@@ -272,7 +287,7 @@ def generate_heatline(df_corr, heatmap_tickers, ticker):
     p400_450 = generate_heatline_graph(df_corr, heatmap_tickers[400:450], ticker)
     p450 = generate_heatline_graph(df_corr, heatmap_tickers[450:], ticker)
 
-    megaplot = vplot(p0_50, p50_100, p100_150, p150_200, p200_250, p250_300, p300_350, p350_400, p400_450, p450)
+    megaplot = Column(p0_50, p50_100, p100_150, p150_200, p200_250, p250_300, p300_350, p350_400, p400_450, p450)
 
     generated_script, div_tag = components(megaplot)
     cdn_js = CDN.js_files[0]

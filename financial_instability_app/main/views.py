@@ -333,10 +333,12 @@ def adi_plot():
     df = stock_utils.calculate_direction_index(df)
     df = stock_utils.calculate_average_directional_index(df)
 
-    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_average_directional_index_plot(df)
+    generated_script, div_tag, cdn_js, cdn_js_widgets, cdn_css, cdn_css_widgets = \
+        visualization.generate_average_directional_index_plot(df)
 
     return render_template("adx.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
-                           cdn_js=cdn_js, cdn_css=cdn_css)
+                           cdn_js=cdn_js, cdn_css=cdn_css, cdn_js_widgets=cdn_js_widgets,
+                           cdn_css_widgets=cdn_css_widgets)
 
 
 @main.route('/atr')
