@@ -191,10 +191,17 @@ def generate_average_directional_index_plot(df):
 
     from bokeh.layouts import row
 
-    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True)
+    tools = "pan,save,wheel_zoom,box_zoom,reset"
+
+    p = figure(x_axis_type='datetime', width=1200, height=600, responsive=True, tools=tools)
     p.grid.grid_line_alpha = 0.3
 
     l0 = p.line(df.index, df['ADX'], line_width=2, legend='ADX', color='blue')
+    p.add_tools(HoverTool(renderers=[l0], tooltips=[
+        ('ADX', '@y'),
+
+    ]))
+
     l1 = p.line(df.index, df['PDI'], line_width=2, legend='PDI', color='green')
     l2 = p.line(df.index, df['NDI'], line_width=2, legend='NDI', color='red')
 
@@ -205,6 +212,11 @@ def generate_average_directional_index_plot(df):
         l1.visible = 1 in checkbox.active;
         l2.visible = 2 in checkbox.active;
         """)
+
+    # alternatively just to display the value, add 'hover' to the tools list and uncomment below
+    # p.select_one(HoverTool).tooltips = [
+    #     ('Value', '@y'),
+    # ]
 
     layout = row(checkbox, p)
 

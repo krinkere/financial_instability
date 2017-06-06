@@ -12,6 +12,20 @@
     <div class="page-header">
         <h1>ADX plot for <a class="redtext">{{ ticker }}</a></h1>
     </div>
+
+    <p>ADX is used to quantify trend strength. ADX calculations are based on a moving average of price range expansion
+        over a given period of time (default is 14)
+
+        ADX is plotted as a single line that registers trend strength whether price is trending up or down. The
+        indicator is usually plotted in the same window as the two directional movement indicator (DMI) lines, from
+        which ADX is derived.
+
+        When the +DMI(PDI) is above the -DMI(NDI), prices are moving up, and ADX measures the strength of the uptrend.
+        When the -DMI(NDI) is above the +DMI(PDI), prices are moving down, and ADX measures the strength of the
+        downtrend.
+
+
+
     {{ generated_script | safe }}
     {{ div_tag | safe }}
 {% endblock %}
