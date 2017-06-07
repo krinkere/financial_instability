@@ -189,7 +189,7 @@ def generate_swing_index_plot(df, column_name, gen_vertical_line=True):
 
 def generate_average_directional_index_plot(df):
 
-    from bokeh.layouts import row
+    from bokeh.layouts import column, row
 
     tools = "pan,save,wheel_zoom,box_zoom,reset"
 
@@ -218,7 +218,7 @@ def generate_average_directional_index_plot(df):
     #     ('Value', '@y'),
     # ]
 
-    layout = row(checkbox, p)
+    layout = row(p, checkbox)
 
     generated_script, div_tag = components(layout)
     cdn_js = CDN.js_files[0]

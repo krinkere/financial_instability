@@ -14,17 +14,56 @@
     </div>
 
     <p>ADX is used to quantify trend strength. ADX calculations are based on a moving average of price range expansion
-        over a given period of time (default is 14)
+        over a given period of time (default is 14)</p>
 
-        ADX is plotted as a single line that registers trend strength whether price is trending up or down. The
+    <p>ADX is plotted as a single line that registers trend strength whether price is trending up or down. The
         indicator is usually plotted in the same window as the two directional movement indicator (DMI) lines, from
-        which ADX is derived.
-
-        When the +DMI(PDI) is above the -DMI(NDI), prices are moving up, and ADX measures the strength of the uptrend.
+        which ADX is derived.</p>
+    <br>
+    <div style="width: 50%; margin: 0 auto;">
+        <img src="{{ url_for('static', filename='images/AT-ADX1.gif') }}" alt="Using ADX to determine the trend." />
+    </div>
+    <br>
+    <p>When the +DMI(PDI) is above the -DMI(NDI), prices are moving up, and ADX measures the strength of the uptrend.
         When the -DMI(NDI) is above the +DMI(PDI), prices are moving down, and ADX measures the strength of the
-        downtrend.
+        downtrend.</p>
 
+    <h4>Quantifying Trend Strength</h4>
+    <p>ADX values help traders to identify the strongest and most profitable trends to trade. The values are also
+        important for distinguishing between trending and non-trending conditions.</p>
 
+    <p>Many traders will use ADX readings above 25 to suggest that the trend's strength is strong enough for trend
+        trading strategies. Conversely, when ADX is below 25, many will avoid trend trading strategies.
+    </p>
+
+    <p>
+    <div style="width: 50%; margin: 0 auto;">
+    <table class="regTable">
+    <tr><th>ADX Value</th><th>Trend Strength</th></tr>
+    <tr><td>0-25</td><td>Absent or Weak Trend</td></tr>
+    <tr><td>25-50</td><td>Strong Trend</td></tr>
+    <tr><td>50-75</td><td>Very Strong Trend</td></tr>
+    <tr><td>75-100</td><td>Extremely Strong Trend</td></tr>
+    </table>
+    </div>
+    </p>
+    <br><br><br><br><br><br>
+
+    <h4>Strategic Use of ADX</h4>
+    <p>Price is the single most important signal on a chart. Read price first, and then read ADX in the context of what
+        price is doing. When any indicator is used, it should add something that price alone cannot easily tell us.
+        Breakouts from a range occur when there is a disagreement between the buyers and sellers on price, which tips
+        the balance of supply and demand. Whether it is more supply than demand, or more demand than supply, it is the
+        difference that creates price momentum.</p>
+
+    <p>Breakouts are not hard to spot, but they often fail to progress or end up being a trap. But ADX tells you when
+        breakouts are valid by showing when ADX is strong enough for price to trend after the breakout. When ADX rises
+        from below 25 to above 25, price is strong enough to continue in the direction of the breakout.</p>
+
+    <p>ADX shows when the trend has weakened and is entering a period of range consolidation. Range conditions exist
+        when ADX drops from above 25 to below 25. In a range, the trend is sideways and there is general price
+        agreement between the buyers and sellers. ADX will meander sideways under 25 until the balance of supply
+        and demand changes again.</p>
 
     {{ generated_script | safe }}
     {{ div_tag | safe }}
