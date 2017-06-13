@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Financial Instability{% endblock %}
+
+{% block page_content %}
+    <link rel="stylesheet" href={{ cdn_css }} type="text/css" />
+    <script type="text/javascript" src={{ cdn_js }}></script>
+    <div class="page-header">
+        <h1>Chaikin Money Flow for <a class="redtext">{{ ticker }}</a></h1>
+    </div>
+    <h3>Chaikin Money Flow Overview</h3>
+    <p>
+        Chaikin Money Flow was created by Marc Chaikin in the early 1980s as a way to measure the accumulation
+        (buying pressure) vs. distribution (selling pressure) of a stock over time. Rising indicator values show the
+        stock is being accumulated, while a falling indicator value shows the stock is being distributed.
+        <br><br>
+        The Chaikin Money Flow showcases price and volume information in one indicator.
+    </p>
+    <h3>Understanding Chaikin Money Flow</h3>
+    <p>
+        Chaikin Money Flow looks inside a stock's trading activity to distinguish price movements which are likely to be
+        supportable based on price/volume patterns. Chaikin Money Flow looks at two important factors to determine the
+        likely sustainability of a price move:
+        <ul>
+            <li>Has the stock been closing strong during this move?</li>
+            <li>Has the move happened on relatively high or low volume?</li>
+        </ul>
+        <b>Buying pressure</b> is represented by stocks which have been <b>closing high</b> in their daily range, on <b>high volume</b>.
+        <b>Selling pressure</b> is represented by stocks which have been <b>closing low</b> in their daily range on <b>high volume</b>.
+    </p>
+    <p>
+        The Chaikin Money Flow is mainly a confirmation tool, but it can be combined with support/resistance or moving
+        averages to produce trade signals.
+    </p>
+    {{ generated_script | safe }}
+    {{ div_tag | safe }}
+{% endblock %}

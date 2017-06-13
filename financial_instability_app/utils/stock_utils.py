@@ -208,6 +208,22 @@ def calculate_average_directional_index(df):
     return df
 
 
+def calculate_chaikin_money_flow(df):
+    # The calculation for Chaikin Money Flow (CMF) has three distinct steps for this example we will use a 21 Period CMF
+    # 1. Find the Money Flow Multiplier
+    #    [(Close  -  Low) - (High - Close)] /(High - Low) = Money Flow Multiplier
+    #
+    money_flow_multiplier = (2 * df['Close'] - df['High'] - df['Low']) / (df['High'] - df['Low'])
+    # 2. Calculate Money Flow Volume
+    #    Money Flow Multiplier x Volume for the Period = Money Flow Volume
+    money_flow_volume = money_flow_multiplier * df['Volume']
+    # 3. Calculate The CMF
+    #    21 Period Sum of Money Flow Volume / 21 Period Sum of Volume = 21 Period CMF
+    df['Chaikin'] = money_flow_volume.rolling(window=21).sum() / df['Volume'].rolling(window=21).sum()
+
+    return df
+
+
 def calculate_average_true_range(df):
     df['ATR1'] = abs(df['High'] - df['Low'])
     df['ATR2'] = abs(df['High'] - df['Close'].shift())

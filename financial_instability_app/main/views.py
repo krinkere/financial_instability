@@ -341,6 +341,19 @@ def adi_plot():
                            cdn_css_widgets=cdn_css_widgets)
 
 
+@main.route('/chaikin')
+def chaikin_money_flow_plot():
+    ticker, start, end = utils.get_ticker_start_date_end_date(session)
+    df = retrieve_stock_info.get_full_stock_data(ticker, start, end)
+
+    df = stock_utils.calculate_chaikin_money_flow(df)
+
+    generated_script, div_tag, cdn_js, cdn_css = visualization.generate_chaikin_plot(df)
+
+    return render_template("chaikin_plot.html", ticker=ticker, generated_script=generated_script, div_tag=div_tag,
+                           cdn_js=cdn_js, cdn_css=cdn_css)
+
+
 @main.route('/atr')
 def atr_plot():
     ticker, start, end = utils.get_ticker_start_date_end_date(session)
