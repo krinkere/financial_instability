@@ -1,1 +1,1 @@
-web: uwsgi uwsgi.ini
+web: python manage.py runserver --port 5000 --host 0.0.0.0 --no-debug
