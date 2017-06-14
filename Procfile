@@ -1,1 +1,1 @@
-worker: uwsgi --socket 127.0.0.1:5000 --file manage.py --callable application
+web: uwsgi --socket 127.0.0.1:0000 --file manage.py --callable application
