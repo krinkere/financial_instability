@@ -15,10 +15,6 @@ Create new database
 Delete database
 # python manage.py destroy_db
 
-web: uwsgi --http-socket :5000 --wsgi-file manage.py
-web: uwsgi --socket 127.0.0.1:5000 --file manage.py --callable application
-
-
 Set up cron job like so to generate monster SP500 file
 # crontab -e
 <location_of_conda_env>/financial_instability/bin/python2.7 <location_of_project>/financial_instability/financial_instability_app/utils/generate_sp500_data.py
