@@ -4,7 +4,7 @@ from bokeh.resources import CDN
 from bokeh.charts import Histogram, Bar
 from bokeh.models import Span
 from bokeh.models.layouts import Column
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import stock_utils
 from colorsys import hsv_to_rgb
 import random
@@ -412,28 +412,28 @@ def generate_bollinger_plot(df, ticker):
     return generated_script, div_tag, cdn_js, cdn_css
 
 
-def plot_stock_analysis(adj_close_data):
-    normalized_data = stock_utils.normalize_data(adj_close_data)
-    daily_returns = stock_utils.calculate_daily_returns(adj_close_data)
-    cum_returns = stock_utils.calculate_cumulative_returns_from_daily(daily_returns)
-
-    fig, axes = plt.subplots(nrows=4, ncols=1)
-    fig.subplots_adjust(hspace=2)
-    adj_close_data.plot(ax=axes[0], title="Adjusted Close", grid=True)
-    normalized_data.plot(ax=axes[1], title="Normalized Stock Information", grid=True)
-    daily_returns.plot(ax=axes[2], title="Daily Returns", grid=True)
-    cum_returns.plot(ax=axes[3], title="Cumulative Returns", grid=True)
-    # plt.show()
-
-    from io import BytesIO
-    figfile = BytesIO()
-    plt.savefig(figfile, format='png')
-    figfile.seek(0)  # rewind to beginning of file
-    figdata_png = figfile.getvalue()  # extract string (stream of bytes)
-
-    import base64
-    figdata_png = base64.b64encode(figdata_png)
-    return figdata_png
+# def plot_stock_analysis(adj_close_data):
+#     normalized_data = stock_utils.normalize_data(adj_close_data)
+#     daily_returns = stock_utils.calculate_daily_returns(adj_close_data)
+#     cum_returns = stock_utils.calculate_cumulative_returns_from_daily(daily_returns)
+#
+#     fig, axes = plt.subplots(nrows=4, ncols=1)
+#     fig.subplots_adjust(hspace=2)
+#     adj_close_data.plot(ax=axes[0], title="Adjusted Close", grid=True)
+#     normalized_data.plot(ax=axes[1], title="Normalized Stock Information", grid=True)
+#     daily_returns.plot(ax=axes[2], title="Daily Returns", grid=True)
+#     cum_returns.plot(ax=axes[3], title="Cumulative Returns", grid=True)
+#     # plt.show()
+#
+#     from io import BytesIO
+#     figfile = BytesIO()
+#     plt.savefig(figfile, format='png')
+#     figfile.seek(0)  # rewind to beginning of file
+#     figdata_png = figfile.getvalue()  # extract string (stream of bytes)
+#
+#     import base64
+#     figdata_png = base64.b64encode(figdata_png)
+#     return figdata_png
 
 
 def get_colors(size):
