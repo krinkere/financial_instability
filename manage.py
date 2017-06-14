@@ -4,14 +4,13 @@ from financial_instability_app.models import Ticker, Sector, Portfolio
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 
-
-financial_instability_app = create_app(os.getenv('FLASK_CONFIG') or 'default')
-manager = Manager(financial_instability_app)
-migrate = Migrate(financial_instability_app, db)
+application = create_app(os.getenv('FLASK_CONFIG') or 'default')
+manager = Manager(application)
+migrate = Migrate(application, db)
 
 
 def make_shell_context():
-    return dict(financial_instability_app=financial_instability_app, db=db, Ticker=Ticker, Sector=Sector,
+    return dict(financial_instability_app=application, db=db, Ticker=Ticker, Sector=Sector,
                 Portfolio=Portfolio)
 
 manager.add_command('shell', Shell(make_context=make_shell_context))
@@ -41,5 +40,6 @@ def destroy_db():
 # Start the application
 if __name__ == '__main__':
     print "Available Routes:"
-    print list(financial_instability_app.url_map.iter_rules())
-    manager.run()
+    print list(application.url_map.iter_rules())
+    # manager.run()
+    application.run()
