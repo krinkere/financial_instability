@@ -1,1 +1,1 @@
-web: uwsgi --file manage.py --callable financial_instability_app
+web: uwsgi --socket 127.0.0.1:5000 --file manage.py --callable financial_instability_app
