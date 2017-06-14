@@ -1,1 +1,1 @@
-web: uwsgi uwsgi.ini
+web: uwsgi --http-socket :5000 --wsgi-file manage.py
