@@ -1,0 +1,6 @@
+*.sqlite
+.nfs*
+*.pyc
+.idea*
+logs/*
+pickle_jar/*
