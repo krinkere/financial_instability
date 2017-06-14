@@ -42,4 +42,5 @@ def destroy_db():
 if __name__ == '__main__':
     print "Available Routes:"
     print list(financial_instability_app.url_map.iter_rules())
-    manager.run()
+    # manager.run()
+    financial_instability_app.run()
